@@ -125,8 +125,8 @@ def DACPress(wlength):
     pressure1 = round(A/B * ((wlength/R1)**B -1),4)
     pressure2 = round(A1*((wlength-R1)/R1)*(1 + B1*((wlength-R1)/R1)),4)
 
-    print(f"\nFor a Ruby wavelength of {wlength} nm the pressure is {pressure1} GPa")
-    print(f"By Using the Ruby2020 formula the pressure is {pressure2} GPa\n")
+    #print(f"\nFor a Ruby wavelength of {wlength} nm the pressure is {pressure1} GPa")
+    #print(f"By Using the Ruby2020 formula the pressure is {pressure2} GPa\n")
     return pressure1
 
 #------------------------------------------
@@ -168,6 +168,19 @@ def wn2en(wavenumber):
 
 #------------------------------------------
 
+
+def en2wn(energy):
+    h = 4.135667516E-15
+    c = 299792458
+    energy = float(energy)
+    wn = energy / (h * c * 100 * 1000)
+    print(f'{energy} meV => = ', wn , 'cm-1')
+    return wn
+
+#------------------------------------------
+
+
+
 def thz2wn(freq2convert):
     '''terahertz to wavenumber converter'''
     convFactor = 33.356
@@ -183,6 +196,13 @@ def wn2thz(wavenumber):
     print(wavenumber, 'cm-1 ==>',  freq, 'THz')
     return freq
 
+#------------------------------------------
+
+def wl2wn(wavelength):
+    factor = 10000000 # ten millions
+    wavenumber = factor/wavelength
+    print(wavelength, 'nm ==>',  wavenumber, 'cm-1')
+    return wavenumber
 
 #------------------------------------------
 
