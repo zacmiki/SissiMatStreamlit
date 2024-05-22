@@ -6,7 +6,7 @@ from dacutilities import page2
 
 # Set up the sidebar.  -  SIDEBAR ----------- SIDEBAR ------------ SIDEBAR OPTIONS
 st.sidebar.title("INFRARED Utilities")
-#st.sidebar.caption("By Zac")
+st.sidebar.caption("By Zac")
 st.sidebar.write("Please select an option from the sidebar.")
 
 
@@ -31,5 +31,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
