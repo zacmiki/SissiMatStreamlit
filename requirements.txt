@@ -1,0 +1,6 @@
+brukeropusreader
+numpy
+pandas
+opusFC
+scipy
+matplotlib
