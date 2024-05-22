@@ -18,8 +18,9 @@ def page2():
 
     # You can use a column just like st.sidebar:
     with left_column:
-        st.markdown("#### Pressure from LinePos")
-        st.markdown(f"##### :red[Ruby Position in nm] ####")
+        st.markdown("##### Pressure from ruby line pos [nm]")
+        st.caption("at ambient T")
+        st.markdown(f"##### :red[Ruby line pos in nm]")
         rubypos = st.number_input("", step=0.01, format="%.2f", value=694.19, key="DACPress", label_visibility="collapsed")
         pressure = DACPress(rubypos)
         st.markdown(f"###### :red[Corresponding Pressure =] {pressure:.3f} GPa")
@@ -30,12 +31,13 @@ def page2():
             st.session_state.pressure_df = pd.concat([st.session_state.pressure_df, new_row], ignore_index=True)
             st.success("Pressure value added to DataFrame")
 
-        # Display the DataFrame
-        st.write(st.session_state.pressure_df)
+        # Display the editable DataFrame
+        st.data_editor(st.session_state.pressure_df, key='pressure_editor')
 
     with right_column:
-        st.markdown("#### Temp from LinePos")
-        st.markdown(f"##### :red[Ruby Position in nm] ####")
+        st.markdown("##### Temp from ruby line pos in [nm]")
+        st.caption("at ambient P")
+        st.markdown(f"##### :red[Ruby line pos in nm] ####")
         line4temp = st.number_input("", step=0.01, format="%.2f", value=694.19, key="DACTemp", label_visibility="collapsed")
         temperature = DACTemp(line4temp)
         st.markdown(f"###### :red[Corresponding Temperature =] {temperature:.2f} K")
@@ -46,8 +48,5 @@ def page2():
             st.session_state.temp_df = pd.concat([st.session_state.temp_df, new_row], ignore_index=True)
             st.success("Temperature value added to DataFrame")
 
-        # Display the DataFrame
-        st.write(st.session_state.temp_df)
-
-page2()
-
+        # Display the editable DataFrame
+        st.data_editor(st.session_state.temp_df, key='temp_editor')
