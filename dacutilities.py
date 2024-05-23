@@ -7,7 +7,7 @@ def page2():
     st.title("💎️ DAC Utilities")
     st.divider()
 
-    left_column, right_column = st.columns(2)import streamlit as st
+    left_column, right_column = st.columns(2)
 import pandas as pd
 from sissi_util import DACTemp, DACPress
 
