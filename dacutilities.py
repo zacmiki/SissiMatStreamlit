@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 from sissi_util import DACTemp, DACPress
-
 def page2():
     # --------- PAGE LAYOUT
     
