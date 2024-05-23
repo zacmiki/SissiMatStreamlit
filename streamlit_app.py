@@ -3,7 +3,8 @@ import pandas as pd
 import streamlit as st
 from irconverters import page1
 from dacutilities import page2
-from OpusGraher import graphopus  # Update the import statement to match the correct file name
+from OpusGraher import graphopus
+from Opusinspector import inspectopusfile
 
 # Set up the sidebar.  -  SIDEBAR ----------- SIDEBAR ------------ SIDEBAR OPTIONS
 st.sidebar.title("INFRARED Utilities")
@@ -17,7 +18,8 @@ def main():
         [
             "DAC Utilities",
             "IR Converters",
-            "Graph Opus File"
+            "Graph Opus File",
+            "Opus File Inspector"
         ],
     )
     
@@ -27,6 +29,9 @@ def main():
         page2()
     elif selected_option == "Graph Opus File":
         graphopus()
+    elif selected_option == "Opus File Inspector":
+        inspectopusfile()
+        
 
 if __name__ == "__main__":
     main()
