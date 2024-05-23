@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+import streamlit as st
 """
 Created on Mon Dec 19 10:04:36 2022
 
@@ -137,23 +136,23 @@ def DACTemp(wlength):
     R1 = float(694.19)      #Our Reference ruby Line position at Ambient Temperature
 
     # Tambient = float(input("\n \nEnter the value of the ambient temp in K: "))   ---- old
-    print(f"\nRef wavelength used: {R1} nm\nAmbient Temperature used: {Tambient} K")
+    #print(f"\nRef wavelength used: {R1} nm\nAmbient Temperature used: {Tambient} K")
 
     #T1 = float(273.15 + Tambient)
     T2 = (wlength - R1)/0.00726 + Tambient
 
-    print("For a wavelength of", wlength, "the temperature is %.3f" % T2, "K")
+    #print("For a wavelength of", wlength, "the temperature is %.3f" % T2, "K")
     return T2
 
 #------------------------------------------
 def DACLinePos(temp):
     Tambient = float(298.1) #Ref Ambient temperature while acquiring the ref ruby line
     R1 = float(694.19)      #Ref ruby Line position at Ambient Temperature
-    print("\nRef wavelength and temperature for our ruby are ", R1, "nm at %.3f" % Tambient, "K")
+    #print("\nRef wavelength and temperature for our ruby are ", R1, "nm at %.3f" % Tambient, "K")
 
     R2 = R1 + (temp - Tambient) * 0.00726
 
-    print(f"At {temp}K the line will be at %.3f" % R2, "nm\n")
+    #print(f"At {temp}K the line will be at %.3f" % R2, "nm\n")
     return R2
 
 #------------------------------------------
@@ -163,7 +162,7 @@ def wn2en(wavenumber):
     c = 299792458
     wavenum = float(wavenumber)
     energy = h * c * wavenum * 100 * 1000
-    print(f'{wavenumber} cm-1 => = ', energy , 'meV')
+    #print(f'{wavenumber} cm-1 => = ', energy , 'meV')
     return energy
 
 #------------------------------------------
@@ -174,7 +173,7 @@ def en2wn(energy):
     c = 299792458
     energy = float(energy)
     wn = energy / (h * c * 100 * 1000)
-    print(f'{energy} meV => = ', wn , 'cm-1')
+    #print(f'{energy} meV => = ', wn , 'cm-1')
     return wn
 
 #------------------------------------------
@@ -185,7 +184,7 @@ def thz2wn(freq2convert):
     '''terahertz to wavenumber converter'''
     convFactor = 33.356
     waveNumber = freq2convert * convFactor
-    print(freq2convert, 'THz ==>',  waveNumber, 'cm-1')
+    #print(freq2convert, 'THz ==>',  waveNumber, 'cm-1')
     return waveNumber
 
 #------------------------------------------
@@ -193,7 +192,7 @@ def thz2wn(freq2convert):
 def wn2thz(wavenumber):
     convFactor = 33.356
     freq = wavenumber / convFactor
-    print(wavenumber, 'cm-1 ==>',  freq, 'THz')
+    #print(wavenumber, 'cm-1 ==>',  freq, 'THz')
     return freq
 
 #------------------------------------------
@@ -201,7 +200,7 @@ def wn2thz(wavenumber):
 def wl2wn(wavelength):
     factor = 10000000 # ten millions
     wavenumber = factor/wavelength
-    print(wavelength, 'nm ==>',  wavenumber, 'cm-1')
+    #print(wavelength, 'nm ==>',  wavenumber, 'cm-1')
     return wavenumber
 
 #------------------------------------------
@@ -217,19 +216,21 @@ def parvalues(fileName):
     for item in range(len(dbs)):
         if (dbs[item][0]) != 'SIFG':
             data = opusFC.getOpusData(fileName, dbs[item])
-            print("\n\033[1m Acquisition Parameters \n\033[0m")
-
-            #print(f"Spec Type =\t{data.parameters['PLF']}")  .... dict.get is better !! 
-            print(f"Spec Type =\t{data.parameters.get('PLF')}")
-            print(f"Aperture =\t{data.parameters.get('APT')} \nBSplitter = \t{data.parameters.get('BMS')}")
             
-            print(f"Source = \t{data.parameters.get('SRC')} \nDetector = \t{data.parameters.get('DTC')}")
-            print(f"Frequency = \t{data.parameters.get('VEL')} kHz\nChannel = \t{data.parameters.get('CHN')}")
-            print(f"Resol = \t{data.parameters.get('RES')} cm-1")
-            print(f"Data from:\t{data.parameters.get('LXV')} to {data.parameters.get('FXV')} cm-1")
-            print(f"Pressure =\t{data.parameters.get('PRS')} hPa")
-            print(f"Acq Date =\t{data.parameters.get('DAT')}")
-            print(f"Acq Time =\t{data.parameters.get('TIM')}")
+            st.markdown("#### Acquisition Parameters:")
+            
+            st.markdown(
+            f"##### :red[Spec Type =] {data.parameters.get('PLF')}\n" +
+            f"##### :red[Aperture =]  {data.parameters.get('APT')}  \n##### :red[BSplitter =] \t{data.parameters.get('BMS')}\n" +
+            f"##### :red[Source =]  \t{data.parameters.get('SRC')}  \n##### :red[Detector =] \t{data.parameters.get('DTC')}\n" +
+            f"##### :red[Frequency =]  \t{data.parameters.get('VEL')} kHz  \n##### :red[Channel =] \t{data.parameters.get('CHN')}\n" +
+            f"##### :red[Resol =]  \t{data.parameters.get('RES')} cm-1\n"
+            f"##### :red[Data From:] {data.parameters.get('LXV')} :red[to --->] {data.parameters.get('FXV')} cm-1\n" + 
+            f"##### :red[Pressure =]  \t{data.parameters.get('PRS')} hPa\n"
+            f"##### :red[Acq Date =]  \t{data.parameters.get('DAT')}\n"
+            f"##### :red[Acq Time =]  \t{data.parameters.get('TIM')}\n"
+            )
+
     return
 
 #------------------------------------------
