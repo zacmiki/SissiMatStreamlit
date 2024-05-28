@@ -35,7 +35,7 @@ def opusgrapher(file_path):
     
     data = {name: spec for name, spec in zip(spectra_names, spectra)}
     
-    fig, axs = plt.subplots(len(data), figsize=(10, len(data) * 3))
+    fig, axs = plt.subplots(len(data), figsize=(10, len(data) * 5))
     
     for i, key in enumerate(data):
         if len(data) == 1:
