@@ -49,7 +49,14 @@ def histo_100(dff):
 	ax.grid(True, which='minor', axis='y', linestyle='--', color='red', linewidth=0.2)
 	
 	# Print the center value of the Gaussian
-	ax.text(mu, max(gaussian_curve), f'Center: {mu:.2f}', color='r', ha='center')
+	ax.text(
+		mu, 
+		max(gaussian_curve), 
+		f'Center: {mu:.2f}',
+		color='r',
+		ha='center'
+		fontsize = medium,
+	)
 	
 	# Display the plot using Streamlit
 	st.pyplot(fig)
