@@ -55,7 +55,7 @@ def histo_100(dff):
 		f'Center: {mu:.2f}',
 		color='r',
 		ha='center'
-		fontsize = medium,
+		fontsize = 14,
 	)
 	
 	# Display the plot using Streamlit
