@@ -51,11 +51,12 @@ def histo_100(dff):
 	# Print the center value of the Gaussian
 	ax.text(
 		mu, 
-		max(gaussian_curve), 
+		max(gaussian_curve) * 0.5, 
 		f'Center: {mu:.2f}',
 		color='r',
 		ha='center'
-		fontsize = 14,
+		fontsize = "x-large",
+		fontweight = "demibold"
 	)
 	
 	# Display the plot using Streamlit
