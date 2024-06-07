@@ -1,5 +1,6 @@
 import streamlit as st
 import plotly.graph_objects as go
+import numpy as np
 import opusFC
 import os
 
@@ -13,8 +14,7 @@ def graphopus():
     if uploaded_file is not None:
         file_name = uploaded_file.name
         st.session_state.fileloaded = file_name
-        file_extension = file_name.split(".")[-1]
-        
+        file_extension = file_name.split(".")[-1]     
         # Check if the file extension is an integer
         if file_extension.isdigit():
             with open("temp.opus", "wb") as f:
@@ -67,6 +67,21 @@ def opusgrapher(file_path):
             mirror = True,
         )
         st.plotly_chart(fig)
+        
+    if st.button("Press to Download the Spectra as TXT", key = "download"):
+        opusfileexport(file_path)
+        
 
-def opusfileexport():
+def opusfileexport(file_path):
+    #
+    dbs = opusFC.listContents(file_path)
+    dataSets = len(dbs)
+    a = np.array(dbs)
+    for sets in range(dataSets):
+        data = opusFC.getOpusData(file_path, dbs[sets])
+        for item in dbs:
+            suffix = item[0]
+            filename = st.session_state.fileloaded + "." + suffix + ".txt"
+            spectrum = np.column_stack((data.x, data.y))
+            np.savetxt(filename, spectrum, delimiter = ',')
     return
