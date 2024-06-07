@@ -220,15 +220,15 @@ def parvalues(fileName):
             st.markdown("#### Acquisition Parameters:")
             
             st.markdown(
-            f"##### :red[Spec Type =] {data.parameters.get('PLF')}\n" +
-            f"##### :red[Aperture =]  {data.parameters.get('APT')}  \n##### :red[BSplitter =] \t{data.parameters.get('BMS')}\n" +
-            f"##### :red[Source =]  \t{data.parameters.get('SRC')}  \n##### :red[Detector =] \t{data.parameters.get('DTC')}\n" +
-            f"##### :red[Frequency =]  \t{data.parameters.get('VEL')} kHz  \n##### :red[Channel =] \t{data.parameters.get('CHN')}\n" +
-            f"##### :red[Resol =]  \t{data.parameters.get('RES')} cm-1\n"
-            f"##### :red[Data From:] {data.parameters.get('LXV')} :red[to --->] {data.parameters.get('FXV')} cm-1\n" + 
-            f"##### :red[Pressure =]  \t{data.parameters.get('PRS')} hPa\n"
-            f"##### :red[Acq Date =]  \t{data.parameters.get('DAT')}\n"
-            f"##### :red[Acq Time =]  \t{data.parameters.get('TIM')}\n"
+            f"###### :red[Spec Type =] {data.parameters.get('PLF')}\n" +
+            f"###### :red[Aperture =]  {data.parameters.get('APT')}  \n###### :red[BSplitter =] \t{data.parameters.get('BMS')}\n" +
+            f"###### :red[Source =]  \t{data.parameters.get('SRC')}  \n###### :red[Detector =] \t{data.parameters.get('DTC')}\n" +
+            f"###### :red[Frequency =]  \t{data.parameters.get('VEL')} kHz  \n###### :red[Channel =] \t{data.parameters.get('CHN')}\n" +
+            f"###### :red[Resol =]  \t{data.parameters.get('RES')} cm-1\n"
+            f"###### :red[Data From:] {data.parameters.get('LXV')} :red[to --->] {data.parameters.get('FXV')} $cm^{-1}$\n" + 
+            f"###### :red[Pressure =]  \t{data.parameters.get('PRS')} hPa\n"
+            f"###### :red[Acq Date =]  \t{data.parameters.get('DAT')}\n"
+            f"###### :red[Acq Time =]  \t{data.parameters.get('TIM')}\n"
             )
 
     return
