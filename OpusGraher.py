@@ -6,7 +6,7 @@ import os
 
 def graphopus():
     st.title("Raw OPUS File Grapher")
-    st.subheader(":rainbow[Experimental Feature]")
+    st.subheader(":rainbow[Plot of the saved OPUS File as it is]")
     st.subheader("Graphing all datasets inside the File")
 
     uploaded_file = st.file_uploader("Choose an OPUS file")
