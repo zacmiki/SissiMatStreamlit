@@ -2,9 +2,8 @@ import streamlit as st
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
-from procedures.ringparameters import *
-from procedures.sissi_util import DACTemp, DACPress
-from procedures.sissi_util import loadSSC
+from ringparameters import *
+from sissi_util import DACTemp, DACPress, loadSSC
 from OpusGraher import opusgrapher
 import matplotlib.pyplot as plt
 import numpy as np
