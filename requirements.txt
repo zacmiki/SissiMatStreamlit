@@ -5,3 +5,4 @@ opusFC
 scipy
 matplotlib
 plotly
+bs4
