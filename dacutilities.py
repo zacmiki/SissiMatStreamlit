@@ -1,6 +1,10 @@
 import streamlit as st
 import pandas as pd
 from sissi_util import DACTemp, DACPress
+import numpy as np
+import plotly.graph_objects as go
+
+
 
 def page2():
     st.title("💎️ DAC Utilities")
@@ -52,3 +56,58 @@ def page2():
         st.data_editor(st.session_state.temp_df, key='temp_editor')
     
     st.divider()
+    graphandfitruby()
+    
+
+def graphandfitruby():
+    st.subheader(":rainbow[Ruby Fluorescence file: Graph & Fitting  ]")        
+    uploaded_file = st.file_uploader("Choose The Ruby (.txt) file", type = ['txt'])
+    
+    if uploaded_file is not None:
+        data = load_file(uploaded_file)
+        x=data[:,0]
+        y=data[:,1]
+        
+        st.markdown(f"\n##### 💎 File Loaded: :red[{uploaded_file.name}]")
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=data[:,0], y=data[:,1], mode='lines'))
+        
+        fig.update_layout(
+            title = uploaded_file.name,
+            margin=dict(l=40, r=40, t=40, b=40),
+
+            #autosize = False,
+            height = 600,
+            xaxis_title = "nm",
+            yaxis_title = "Counts",
+            font=dict(
+                family="Helvetica",
+                size=28,
+                color="RebeccaPurple"
+            )
+        )
+        
+        fig.update_xaxes(
+            showline = True, linewidth = 2, linecolor = "white",
+            showgrid = True,
+            minor_showgrid = True,
+            #font = dict(size = 18),
+            mirror = True,
+        )
+        
+        fig.update_yaxes(
+            showline = True, linewidth = 2, linecolor = "white",
+            showgrid = True,
+            minor_showgrid = True,
+            mirror = True,
+        )
+        
+        st.plotly_chart(fig)
+    
+
+# Function to load and process the file
+def load_file(file):
+    # Load the file data skipping the header and footer lines
+    data = np.genfromtxt(file, skip_header=17, skip_footer=1)
+    return data
