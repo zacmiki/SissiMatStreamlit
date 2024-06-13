@@ -33,57 +33,57 @@ def get_elettra_status():
         with col2:
             st.info(f"\n##### Ring Current = {get_current_value()}")
         
-# --------------------
 
-path = st.file_uploader("Choose the OPUS Files to Average\n  :red[The files must have the same number of datapoints]", accept_multiple_files=True, label_visibility="visible")
-
-if path:
-    y_values_sum = None
-    x_values = None
-    num_files = 0
-    
-    for uploaded_file in path:
-        if uploaded_file is not None:
-            file_name = uploaded_file.name
-            st.session_state.fileloaded = file_name
-            file_extension = file_name.split(".")[-1]
-            if file_extension.isdigit():
-                with open("temp.opus", "wb") as f:
-                    f.write(uploaded_file.getbuffer())
-                    data = load_opus_data("temp.opus")
-                    if data is not None:
-                        if y_values_sum is None:
-                            # Initialize the sum with the first file's y-values
-                            y_values_sum = np.zeros_like(data.y)
-                            x_values = data.x
-                        y_values_sum += data.y
-                        num_files += 1
-                        plt.plot(data.x, data.y, label=f'File {num_files}')
-                    else:
-                        st.error(f"Failed to load data from {file_name}.")
+def averaging():
+    path = st.file_uploader("Choose the OPUS Files to Average\n  :red[The files must have the same number of datapoints]", accept_multiple_files=True, label_visibility="visible")
+    if path:
+        y_values_sum = None
+        x_values = None
+        num_files = 0
+        
+        for uploaded_file in path:
+            if uploaded_file is not None:
+                file_name = uploaded_file.name
+                st.session_state.fileloaded = file_name
+                file_extension = file_name.split(".")[-1]
+                if file_extension.isdigit():
+                    with open("temp.opus", "wb") as f:
+                        f.write(uploaded_file.getbuffer())
+                        data = load_opus_data("temp.opus")
+                        if data is not None:
+                            if y_values_sum is None:
+                                # Initialize the sum with the first file's y-values
+                                y_values_sum = np.zeros_like(data.y)
+                                x_values = data.x
+                            y_values_sum += data.y
+                            num_files += 1
+                            plt.plot(data.x, data.y, label=f'File {num_files}')
+                        else:
+                            st.error(f"Failed to load data from {file_name}.")
+                else:
+                    st.write("Please choose files with integer extensions.")
             else:
-                st.write("Please choose files with integer extensions.")
-        else:
-            st.write("Please choose only OPUS files.")
+                st.write("Please choose only OPUS files.")
     
-    if num_files > 0:
-        # Compute the average
-        averaged_spectrum = y_values_sum / num_files
+        if num_files > 0:
+            # Compute the average
+            averaged_spectrum = y_values_sum / num_files
         
-        st.write("Averaged Spectrum:")
-        #st.write(averaged_spectrum)
+            st.write("Averaged Spectrum:")
+            #st.write(averaged_spectrum)
         
-        # Plot the averaged spectrum
-        plt.plot(x_values, averaged_spectrum, label='Averaged Spectrum', linewidth=2, color='black')
-        plt.xlabel('X-axis label')
-        plt.ylabel('Y-axis label')
-        plt.title('Averaged Spectrum')
-        plt.legend()
-        plt.grid()
-        st.pyplot(plt)
-    else:
-        st.write("No valid OPUS files uploaded.")
+            # Plot the averaged spectrum
+            plt.plot(x_values, averaged_spectrum, label='Averaged Spectrum', linewidth=2, color='black')
+            plt.xlabel('X-axis label')
+            plt.ylabel('Y-axis label')
+            plt.title('Averaged Spectrum')
+            plt.legend()
+            plt.grid()
+            st.pyplot(plt)
+        else:
+            st.write("No valid OPUS files uploaded.")
 
 def averagespectrapage():
     get_elettra_status()
+    averaging()
     
