@@ -33,7 +33,7 @@ def main():
     elif selected_option == "Opus File Inspector":
         inspectopusfile()
     elif selected_option == "Multiple Spectra Averaging":
-        averagespectra()
+        averagespectrapage()
         
 
 if __name__ == "__main__":
