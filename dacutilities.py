@@ -50,5 +50,5 @@ def page2():
 
         # Display the editable DataFrame
         st.data_editor(st.session_state.temp_df, key='temp_editor')
-
-st.divider()
+    
+    st.divider()
