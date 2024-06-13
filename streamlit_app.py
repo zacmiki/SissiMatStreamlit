@@ -19,8 +19,8 @@ def main():
             "DAC Utilities",
             "IR Converters",
             "Graph Opus File",
-            "Opus File Inspector"
-            "Multiple Spectra Averaging"
+            "Opus File Inspector",
+            "Multiple Spectra Averaging",
         ],
     )
     
