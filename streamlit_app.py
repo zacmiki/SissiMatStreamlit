@@ -20,6 +20,7 @@ def main():
             "IR Converters",
             "Graph Opus File",
             "Opus File Inspector"
+            "Multiple Spectra Averaging"
         ],
     )
     
@@ -31,6 +32,8 @@ def main():
         graphopus()
     elif selected_option == "Opus File Inspector":
         inspectopusfile()
+    elif selected_option == "Multiple Spectra Averaging":
+        averagespectra()
         
 
 if __name__ == "__main__":
