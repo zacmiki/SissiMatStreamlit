@@ -46,6 +46,6 @@ def page1():
             
             
     st.divider()
-    st.header(":rainbow[Cool comments and notes underneath]")
+    st.header(":rainbow[More converters to be implemented]")
             
             
