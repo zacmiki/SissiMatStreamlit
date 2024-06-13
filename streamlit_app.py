@@ -3,6 +3,7 @@ import pandas as pd
 import streamlit as st
 from irconverters import page1
 from dacutilities import page2
+from averagespectra import averagespectrapage
 from OpusGraher import graphopus
 from Opusinspector import inspectopusfile
 
