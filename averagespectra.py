@@ -22,16 +22,17 @@ def load_opus_data(file_path):
         st.error(f"Error loading OPUS data from {file_path}: {e}")
         return None
 
-if st.button(f"""\n\n## GET ELETTRA STATUS"""):
-    st.markdown(f"<h1 style = 'text-align: center; color: grey;'>Machine Status =\t{get_machine_status()}</h1>", 
-                unsafe_allow_html = True
-    )
+def get_elettra_status():
+    if st.button(f"""\n\n## GET ELETTRA STATUS"""):
+        st.markdown(f"<h1 style = 'text-align: center; color: grey;'>Machine Status =\t{get_machine_status()}</h1>", 
+                    unsafe_allow_html = True
+        )
     
-    col1, col2 = st.columns(2)
-    with col1:
-        st.info(f"\n##### Ring Energy = {get_energy_value()}")
-    with col2:
-        st.info(f"\n##### Ring Current = {get_current_value()}")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.info(f"\n##### Ring Energy = {get_energy_value()}")
+        with col2:
+            st.info(f"\n##### Ring Current = {get_current_value()}")
         
 # --------------------
 
@@ -83,3 +84,7 @@ if path:
         st.pyplot(plt)
     else:
         st.write("No valid OPUS files uploaded.")
+
+def averagespectrapage():
+    get_elettra_status()
+    
