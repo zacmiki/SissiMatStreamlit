@@ -4,10 +4,13 @@ import streamlit as st
 from irconverters import page1
 from dacutilities import page2
 from averagespectra import averagespectrapage
+from fitruby import rubyfit
 from OpusGraher import graphopus
 from Opusinspector import inspectopusfile
 
 # Set up the sidebar.  -  SIDEBAR ----------- SIDEBAR ------------ SIDEBAR OPTIONS
+st.set_page_config(layout="wide")
+
 st.sidebar.title("INFRARED Utilities")
 st.sidebar.caption("By Zac")
 st.sidebar.write("Please select an option from the sidebar.")
@@ -22,6 +25,7 @@ def main():
             "Graph Opus File",
             "Opus File Inspector",
             "Multiple Spectra Averaging",
+            "Fit Ruby Spectrum",
         ],
     )
     
@@ -35,6 +39,8 @@ def main():
         inspectopusfile()
     elif selected_option == "Multiple Spectra Averaging":
         averagespectrapage()
+    elif selected_option == "Fit Ruby Spectrum":
+        rubyfit()
         
 
 if __name__ == "__main__":
