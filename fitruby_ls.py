@@ -109,7 +109,7 @@ def rubyfitls():
             st.session_state.l2_amplitude = float(result.params['l2_amplitude'].value)
             st.session_state.l2_sigma = float(result.params['l2_sigma'].value)
 
-            rsquared = 1 - (result.residual.var() / np.var(y))
+            rsquared = 1 - (result.residual.var() / np.var(data[:, 1]))
             
             st.markdown(f"Lor1_Center = {st.session_state.l1_center}")
             st.markdown(f"Lor2_Center = {st.session_state.l2_center}")
