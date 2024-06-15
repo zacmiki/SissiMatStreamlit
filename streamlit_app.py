@@ -6,6 +6,7 @@ from dacutilities import page2
 from averagespectra import averagespectrapage, get_elettra_status
 from fitruby import rubyfit
 from fitruby_ls import rubyfitls
+from fitruby_voigt import rubyfit_v
 from OpusGraher import graphopus
 from Opusinspector import inspectopusfile
 from ringparameters import *
@@ -28,7 +29,8 @@ def main():
             "Opus File Inspector",
             "Multiple Spectra Averaging",
             "Fit Ruby (Gauss)",
-            "Fit Ruby (Lor)"
+            "Fit Ruby (Lor)",
+            "Fit Ruby (Voigt)",
         ],
     )
     
@@ -46,6 +48,8 @@ def main():
         rubyfit()
     elif selected_option == "Fit Ruby (Lor)":
         rubyfitls()
+    elif selected_option == "Fit Ruby (Voigt)":
+        rubyfit_v()
     
     with st.sidebar:
         get_elettra_status()
