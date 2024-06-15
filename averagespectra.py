@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from ringparameters import *
-from sissi_util import DACTemp, DACPress, loadSSC
+from sissi_util import loadSSC
 from OpusGraher import opusgrapher
 import matplotlib.pyplot as plt
 import numpy as np
@@ -23,7 +23,7 @@ def load_opus_data(file_path):
 
 def get_elettra_status():
     if st.button(f"""\n\n## GET ELETTRA STATUS"""):
-        st.markdown(f"<h1 style = 'text-align: center; color: grey;'>Machine Status =\t{get_machine_status()}</h1>", 
+        st.markdown(f"<h1 style = 'text-align: center; color: grey;'>Machine Status<br> {get_machine_status()}</h1>", 
                     unsafe_allow_html = True
         )
     
@@ -84,6 +84,12 @@ def averaging():
             st.write("No valid OPUS files uploaded.")
 
 def averagespectrapage():
-    get_elettra_status()
+    st.title(":rainbow[Averaging Utility]")
+    
+    st.markdown(
+    f"<h3 style = 'text-align: center; color: yellow;'> Choose a series of n equal spectra to sum and average them </h3>", 
+    unsafe_allow_html = True)
+    #get_elettra_status()
+    
     averaging()
     

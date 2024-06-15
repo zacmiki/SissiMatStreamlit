@@ -3,10 +3,12 @@ import pandas as pd
 import streamlit as st
 from irconverters import page1
 from dacutilities import page2
-from averagespectra import averagespectrapage
+from averagespectra import averagespectrapage, get_elettra_status
 from fitruby import rubyfit
+from fitruby_ls import rubyfitls
 from OpusGraher import graphopus
 from Opusinspector import inspectopusfile
+from ringparameters import *
 
 # Set up the sidebar.  -  SIDEBAR ----------- SIDEBAR ------------ SIDEBAR OPTIONS
 st.set_page_config(layout="wide")
@@ -25,7 +27,8 @@ def main():
             "Graph Opus File",
             "Opus File Inspector",
             "Multiple Spectra Averaging",
-            "Fit Ruby Spectrum",
+            "Fit Ruby (Gauss)",
+            "Fit Ruby (Lor)"
         ],
     )
     
@@ -39,9 +42,14 @@ def main():
         inspectopusfile()
     elif selected_option == "Multiple Spectra Averaging":
         averagespectrapage()
-    elif selected_option == "Fit Ruby Spectrum":
+    elif selected_option == "Fit Ruby (Gauss)":
         rubyfit()
-        
+    elif selected_option == "Fit Ruby (Lor)":
+        rubyfitls()
+    
+    with st.sidebar:
+        get_elettra_status()
+
 
 if __name__ == "__main__":
     main()

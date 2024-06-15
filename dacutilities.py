@@ -104,6 +104,7 @@ def graphandfitruby():
         )
         
         st.plotly_chart(fig)
+        st.session_state.data = data
     
 
 # Function to load and process the file
