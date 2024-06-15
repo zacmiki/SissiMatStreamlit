@@ -133,9 +133,11 @@ def rubyfit():
             
             g1_centroid = round(result.params['g1_center'].value,4), 
             g2_centroid = round(result.params['g2_center'].value,4)
+            rsquared = round(1 - (result.residual.var() / np.var(data[:, 1])),4)
             
             st.markdown(f"\nGauss1_Center = {g1_centroid}")
             st.markdown(f"\nGauss2_Center = {g2_centroid}")
+            st.markdown(f"\nThe R-Squared is {rsquared}")
             
             x = data[:,0]
             y = data[:,1]
