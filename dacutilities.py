@@ -60,7 +60,7 @@ def page2():
     
 
 def graphandfitruby():
-    st.subheader(":rainbow[Ruby Fluorescence file: Graph & Fitting  ]")        
+    st.subheader(":rainbow[Ruby Fluor. File Graphing (check peak position)]")        
     uploaded_file = st.file_uploader("Choose The Ruby (.txt) file", type = ['txt'])
     
     if uploaded_file is not None:
