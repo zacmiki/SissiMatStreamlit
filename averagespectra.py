@@ -7,6 +7,7 @@ from sissi_util import loadSSC
 from OpusGraher import opusgrapher
 import matplotlib.pyplot as plt
 import numpy as np
+import io 
 
 def load_opus_data(file_path):
     # Implement the function to load data from OPUS file
@@ -35,7 +36,14 @@ def get_elettra_status():
         
 
 def averaging():
-    path = st.file_uploader("Choose the OPUS Files to Average\n  :red[The files must have the same number of datapoints]", accept_multiple_files=True, label_visibility="visible")
+    st.session_state.fileloaded = ""
+    fileloaded = ""
+    
+    with st.form("my-form", clear_on_submit=True):
+         path = st.file_uploader("Choose the OPUS Files to Average\n  :red[The files must have the same number of datapoints]", accept_multiple_files=True, label_visibility="visible")
+         
+         submitted = st.form_submit_button("submit")
+
     if path:
         y_values_sum = None
         x_values = None
@@ -44,6 +52,7 @@ def averaging():
         for uploaded_file in path:
             if uploaded_file is not None:
                 file_name = uploaded_file.name
+                
                 st.session_state.fileloaded = file_name
                 file_extension = file_name.split(".")[-1]
                 if file_extension.isdigit():
@@ -80,6 +89,24 @@ def averaging():
             plt.legend()
             plt.grid()
             st.pyplot(plt)
+            
+            fileaveraged = st.session_state.fileloaded + "_avg.txt"
+            
+            spectrum = np.column_stack((x_values, averaged_spectrum))
+            output = io.StringIO()
+            np.savetxt(output, spectrum, delimiter=',', fmt='%s')
+            csv_string = output.getvalue()
+            fileaveraged = file_name.split('.')[0]
+            
+            st.download_button(
+                label=f"Download Averaged File",
+                data=csv_string,
+                file_name=fileaveraged,
+                mime="text/csv",
+                key=f"download_averaged"
+            )
+            
+             
         else:
             st.write("No valid OPUS files uploaded.")
 
