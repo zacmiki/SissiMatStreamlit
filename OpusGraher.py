@@ -2,7 +2,7 @@ import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
 import opusFC
-import os
+import io
 
 def graphopus():
     st.title("Raw OPUS File Grapher")
@@ -14,7 +14,7 @@ def graphopus():
     if uploaded_file is not None:
         file_name = uploaded_file.name
         st.session_state.fileloaded = file_name
-        file_extension = file_name.split(".")[-1]     
+        file_extension = file_name.split(".")[-1]
         # Check if the file extension is an integer
         if file_extension.isdigit():
             with open("temp.opus", "wb") as f:
@@ -44,44 +44,49 @@ def opusgrapher(file_path):
         
         fig.update_layout(
             title_text=key,
-            #showlegend=True,
-            
             margin=dict(l=40, r=40, t=40, b=40),
-            
-            #paper_bgcolor="LightSteelBlue",
-            #plot_bgcolor="white",
-            #yaxis=dict(showgrid=True, gridcolor='LightGray', zeroline=True, zerolinecolor='LightGray',
-            
             autosize=True,
             height=400,
         )
         fig.update_xaxes(
-            showline = True, linewidth = 2, linecolor = "white", 
-            showgrid=True,
-            mirror = True,
+            showline=True, linewidth=2, linecolor="white", 
+            showgrid=True, mirror=True,
         )
         fig.update_yaxes(
-            showline = True, linewidth = 2, linecolor = "white",
-            zeroline = True, zerolinecolor = "brown",
-            showgrid=True,
-            mirror = True,
+            showline=True, linewidth=2, linecolor="white",
+            zeroline=True, zerolinecolor="brown",
+            showgrid=True, mirror=True,
         )
         st.plotly_chart(fig)
         
-    if st.button("Press to Download the Spectra as TXT", key = "download"):
+    if st.button("Press to Download the Spectra as TXT", key="download"):
         opusfileexport(file_path)
-        
 
 def opusfileexport(file_path):
-    #
     dbs = opusFC.listContents(file_path)
     dataSets = len(dbs)
-    a = np.array(dbs)
-    for sets in range(dataSets):
-        data = opusFC.getOpusData(file_path, dbs[sets])
-        for item in dbs:
-            suffix = item[0]
-            filename = st.session_state.fileloaded + "." + suffix + ".txt"
-            spectrum = np.column_stack((data.x, data.y))
-            np.savetxt(filename, spectrum, delimiter = ',')
+
+    for index, sets in enumerate(dbs):
+        data = opusFC.getOpusData(file_path, sets)
+        suffix = sets[0]
+        filename = f"{st.session_state.fileloaded}.{suffix}.txt"
+        spectrum = np.column_stack((data.x, data.y))
+        
+        # Convert the numpy array to a CSV string
+        output = io.StringIO()
+        np.savetxt(output, spectrum, delimiter=',', fmt='%s')
+        csv_string = output.getvalue()
+        
+        st.download_button(
+            label=f"Download {filename}",
+            data=csv_string,
+            file_name=filename,
+            mime="text/csv",
+            key=f"download_{index}"
+        )
+
     return
+
+# Run the main function
+if __name__ == "__main__":
+    graphopus()
