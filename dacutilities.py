@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 
 
 def page2():
-    st.title("💎️ DAC Utilities")
+    st.title("💎️ DAC Calculators")
     st.divider()
 
     left_column, right_column = st.columns(2)
