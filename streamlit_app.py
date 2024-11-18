@@ -14,7 +14,7 @@ from ringparameters import *
 # Set up the sidebar.  -  SIDEBAR ----------- SIDEBAR ------------ SIDEBAR OPTIONS
 st.set_page_config(layout="wide")
 
-st.sidebar.title("INFRARED Utilities")
+st.sidebar.title("SISSI IR Utilities")
 st.sidebar.caption("By Zac")
 st.sidebar.write("Please select an option from the sidebar.")
 
