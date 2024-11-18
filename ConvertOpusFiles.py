@@ -59,7 +59,7 @@ def convert_opus_files_in_directory():
                                 np.savetxt(output_file, spectrum, delimiter=',', fmt='%f')
 
             # Clear the log once processing is complete
-            log_placeholder.text("Processing complete. Preparing download...")
+            log_placeholder.text("Processing complete. Download File prepared")
 
             # Provide ZIP file for download
             zip_buffer.seek(0)
