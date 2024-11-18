@@ -8,13 +8,14 @@ from fitruby import rubyfit
 from fitruby_ls import rubyfitls
 from fitruby_voigt import rubyfit_v
 from OpusGraher import graphopus
+from ConvertOpusFiles import convert_opus_files_in_directory
 from Opusinspector import inspectopusfile
 from ringparameters import *
 
 # Set up the sidebar.  -  SIDEBAR ----------- SIDEBAR ------------ SIDEBAR OPTIONS
-st.set_page_config(layout="wide")
+#st.set_page_config(layout="wide")
 
-st.sidebar.title("SISSI IR Utilities")
+st.sidebar.title("🌈SISSI IR Utilities")
 st.sidebar.caption("By Zac")
 st.sidebar.write("Please select an option from the sidebar.")
 
@@ -28,9 +29,8 @@ def main():
             "Graph Opus File",
             "Opus File Inspector",
             "Multiple Spectra Averaging",
-            "Fit Ruby (Gauss)",
-            "Fit Ruby (Lor)",
-            "Fit Ruby (Voigt)",
+            "Fit Ruby",
+            "Convert All OPUS Files"
         ],
     )
     
@@ -42,14 +42,12 @@ def main():
         graphopus()
     elif selected_option == "Opus File Inspector":
         inspectopusfile()
-    elif selected_option == "Multiple Spectra Averaging":
+    elif selected_option == "OPUS Spectra Averaging":
         averagespectrapage()
-    elif selected_option == "Fit Ruby (Gauss)":
-        rubyfit()
-    elif selected_option == "Fit Ruby (Lor)":
+    elif selected_option == "Fit Ruby":
         rubyfitls()
-    elif selected_option == "Fit Ruby (Voigt)":
-        rubyfit_v()
+    elif selected_option == "Convert All OPUS Files":
+        convert_opus_files_in_directory()
     
     with st.sidebar:
         get_elettra_status()
