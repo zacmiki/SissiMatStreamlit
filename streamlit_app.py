@@ -8,7 +8,8 @@ from fitruby import rubyfit
 from fitruby_ls import rubyfitls
 from fitruby_voigt import rubyfit_v
 from OpusGraher import graphopus
-from ConvertOpusFiles import convert_opus_files_in_directory
+#from ConvertOpusFiles import convert_opus_files_in_directory
+from ConvertFiles import convert_opus_files_in_directory
 from Opusinspector import inspectopusfile
 from ringparameters import *
 
