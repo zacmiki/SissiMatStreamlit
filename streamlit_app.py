@@ -29,7 +29,7 @@ def main():
             "IR Converters",
             "Graph Opus File",
             "Opus File Inspector",
-            "Multiple Spectra Averaging",
+            "OPUS Spectra Averaging",
             "Fit Ruby",
             "Convert All OPUS Files"
         ],
