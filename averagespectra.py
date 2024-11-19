@@ -112,6 +112,7 @@ def averaging():
 
 def averagespectrapage():
     st.title(":rainbow[Averaging Utility]")
+    st.subheader("Pick a series of equal OPUS Spectra to load them then click the -Submit- Button")
     
     st.markdown(
     f"<h3 style = 'text-align: center; color: yellow;'> Choose a series of n equal spectra to sum and average them </h3>", 
