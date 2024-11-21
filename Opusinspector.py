@@ -36,7 +36,7 @@ def opusreadinfo(file_path):
     
     st.markdown(f"### :blue[There are {dataSets} datasets inside the file]")
     st.markdown(f"##### {dbs}")
-    st.markdown(f"### :yellow[The saved spectra are: {spectra_names}]")
+    st.markdown(f"### :yellow[The saved spectra are: {spectra_names} ] ")
     
     #spectra = [...... for item in data]
     #data = {name: spec for name, spec in zip(spectra_names, spectra)}
