@@ -41,7 +41,7 @@ def convert_opus_files_in_directory():
     
                     for index, sets in enumerate(dbs):
                         data = opusFC.getOpusData(temp_filename, sets)
-                        suffix = item[0]
+                        suffix = sets[0]
     
                         txt_filename = f"{uploaded_file.name}.{suffix}.txt"
                         spectrum = np.column_stack((data.x, data.y))
