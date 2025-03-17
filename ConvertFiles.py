@@ -14,64 +14,46 @@ def get_opus_files(dir_name):
                 opus_files.append(os.path.join(root, file))
     return opus_files
 
-def convert_opus_files_in_directory():
+def convert_opus_files_in_directory():    
     st.title("🌈️ SISSI-Mat File Utilities")
     st.divider()
     st.header("OPUS File Batch Converter")
-    st.write("This tool will SCAN for ALL OPUS Files starting from the directory you input manually")
-    st.write("Then it will convert ALL data and prepare a ZIP archive with all the contents.")
-
-    # Input for directory path
-    dir_name = st.text_input("Enter the directory path containing OPUS files:")
-
-    if dir_name and os.path.isdir(dir_name):
-        # Find all OPUS files in the specified directory and subdirectories
-        opus_files = get_opus_files(dir_name)
-
-        if opus_files:
-            # Prepare an in-memory ZIP file to store converted files
-            zip_buffer = BytesIO()
-
-            # Display a placeholder for logging
-            log_placeholder = st.empty()
-
-            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-                for opus_file in opus_files:
-                    # Update log for each file being processed
-                    log_placeholder.text(f"Processing file: {opus_file}")
-
-                    dbs = opusFC.listContents(opus_file)
-                    data_sets = len(dbs)
-
-                    for sets in range(data_sets):
-                        data = opusFC.getOpusData(opus_file, dbs[sets])
-
-                        # Define filename for each dataset while maintaining directory structure
-                        for item in dbs:
-                            suffix = item[0]
-                            # Get the relative path of the original OPUS file
-                            relative_path = os.path.relpath(opus_file, dir_name)
-                            base_filename = os.path.basename(opus_file)
-                            txt_filename = f"{os.path.dirname(relative_path)}/{base_filename}.{suffix}.txt"
-
-                            spectrum = np.column_stack((data.x, data.y))
-
-                            # Save to ZIP using the new filename with directory structure
-                            with zip_file.open(txt_filename, "w") as output_file:
-                                np.savetxt(output_file, spectrum, delimiter=',', fmt='%f')
-
-            # Clear the log once processing is complete
-            log_placeholder.text("Processing complete. Preparing download...")
-
-            # Provide ZIP file for download
-            zip_buffer.seek(0)
-            st.download_button(
-                label="Download Converted Files as ZIP",
-                data=zip_buffer,
-                file_name="converted_files.zip",
-                mime="application/zip"
-            )
-        else:
-            st.write("No OPUS files found in the specified directory.")
-    elif dir_name:
-        st.write("The specified path is not a valid directory. Please enter a valid directory path.")
+    st.write("Upload OPUS files to convert them into text files and download as a ZIP.")
+    
+    uploaded_files = st.file_uploader("Upload OPUS files", accept_multiple_files=True, type=["0", "spa", "spc", "ir"])
+    
+    if uploaded_files:
+        zip_buffer = BytesIO()
+    
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for uploaded_file in uploaded_files:
+                st.write(f"Processing: {uploaded_file.name}")
+    
+                # Save the uploaded file to a temporary location
+                temp_filename = f"/tmp/{uploaded_file.name}"
+                with open(temp_filename, "wb") as temp_file:
+                    temp_file.write(uploaded_file.read())
+    
+                # Use the file path instead of BytesIO
+                if opusFC.isOpusFile(temp_filename):
+                    dbs = opusFC.listContents(temp_filename)
+    
+                    for item in dbs:
+                        suffix = item[0]
+                        data = opusFC.getOpusData(temp_filename, item)
+    
+                        txt_filename = f"{uploaded_file.name}.{suffix}.txt"
+                        spectrum = np.column_stack((data.x, data.y))
+    
+                        with zip_file.open(txt_filename, "w") as output_file:
+                            np.savetxt(output_file, spectrum, delimiter=',', fmt='%f')
+                else:
+                    st.error(f"Error: {uploaded_file.name} is not a valid OPUS file.")
+    
+        zip_buffer.seek(0)
+        st.download_button(
+            label="Download Converted Files as ZIP",
+            data=zip_buffer,
+            file_name="converted_files.zip",
+            mime="application/zip"
+        )
