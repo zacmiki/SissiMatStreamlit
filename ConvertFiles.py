@@ -37,13 +37,19 @@ def convert_opus_files_in_directory():
                 # Use the file path instead of BytesIO
                 if opusFC.isOpusFile(temp_filename):
                     dbs = opusFC.listContents(temp_filename)
+                    dataSets = len(dbs)
     
-                    for item in dbs:
+                    for index, sets in enumerate(dbs):
+                        data = opusFC.getOpusData(temp_filename, sets)
                         suffix = item[0]
-                        data = opusFC.getOpusData(temp_filename, item)
     
                         txt_filename = f"{uploaded_file.name}.{suffix}.txt"
                         spectrum = np.column_stack((data.x, data.y))
+                        
+                        # Convert the numpy array to a CSV string
+                        output = io.StringIO()
+                        np.savetxt(output, spectrum, delimiter=',', fmt='%s')
+                        csv_string = output.getvalue()
     
                         with zip_file.open(txt_filename, "w") as output_file:
                             np.savetxt(output_file, spectrum, delimiter=',', fmt='%f')
