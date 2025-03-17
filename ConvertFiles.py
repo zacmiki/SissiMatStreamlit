@@ -47,7 +47,7 @@ def convert_opus_files_in_directory():
                         spectrum = np.column_stack((data.x, data.y))
                         
                         # Convert the numpy array to a CSV string
-                        output = io.StringIO()
+                        output = StringIO()
                         np.savetxt(output, spectrum, delimiter=',', fmt='%s')
                         csv_string = output.getvalue()
     
