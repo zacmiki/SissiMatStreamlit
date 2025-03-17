@@ -31,7 +31,7 @@ def main():
             "Opus File Inspector",
             "OPUS Spectra Averaging",
             "Fit Ruby",
-            "Convert All OPUS Files"
+            "Convert OPUS Files"
         ],
     )
     
@@ -47,7 +47,7 @@ def main():
         averagespectrapage()
     elif selected_option == "Fit Ruby":
         rubyfitls()
-    elif selected_option == "Convert All OPUS Files":
+    elif selected_option == "Convert OPUS Files":
         convert_opus_files_in_directory()
     
     with st.sidebar:
