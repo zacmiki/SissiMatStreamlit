@@ -3,7 +3,7 @@ import os
 import opusFC
 import numpy as np
 import zipfile
-from io import BytesIO
+from io import BytesIO, StringsIO
 
 # Function to get a list of all OPUS files in a directory and its subdirectories
 def get_opus_files(dir_name):
