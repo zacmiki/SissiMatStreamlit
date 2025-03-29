@@ -7,3 +7,4 @@ matplotlib
 plotly
 bs4
 lmfit
+xarray

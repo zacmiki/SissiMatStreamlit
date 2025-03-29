@@ -33,7 +33,7 @@ def get_elettra_status():
             st.info(f"\n##### Ring Energy = {get_energy_value()}")
         with col2:
             st.info(f"\n##### Ring Current = {get_current_value()}")
-        
+
 
 def averaging():
     st.session_state.fileloaded = ""

@@ -1,22 +1,28 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
+
 from irconverters import page1
 from dacutilities import page2
-from averagespectra import averagespectrapage, get_elettra_status
-from fitruby import rubyfit
-from fitruby_ls import rubyfitls
-from fitruby_voigt import rubyfit_v
 from OpusGraher import graphopus
+from Opusinspector import inspectopusfile
+from averagespectra import averagespectrapage, get_elettra_status
+from fitruby_ls import rubyfitls
+
+from preanalysis import online_analysis
+
+from fitruby import rubyfit
+from fitruby_voigt import rubyfit_v
+
 #from ConvertOpusFiles import convert_opus_files_in_directory
 from ConvertFiles import convert_opus_files_in_directory
-from Opusinspector import inspectopusfile
+
 from ringparameters import *
 
 # Set up the sidebar.  -  SIDEBAR ----------- SIDEBAR ------------ SIDEBAR OPTIONS
 #st.set_page_config(layout="wide")
 
-st.sidebar.title("🌈SISSI IR Utilities")
+st.sidebar.title("🌈 SISSI IR Utilities")
 st.sidebar.caption("By Zac")
 st.sidebar.write("Please select an option from the sidebar.")
 
@@ -25,11 +31,12 @@ def main():
     selected_option = st.sidebar.selectbox(
         "Select an option",
         [
-            "DAC Utilities",
             "IR Converters",
+            "Online Basic Data Analysis",
             "Graph Opus File",
             "Opus File Inspector",
             "OPUS Spectra Averaging",
+            "DAC Utilities",
             "Fit Ruby",
             "Convert OPUS Files"
         ],
@@ -49,10 +56,13 @@ def main():
         rubyfitls()
     elif selected_option == "Convert OPUS Files":
         convert_opus_files_in_directory()
+    elif "Online Basic Data Analysis":
+        online_analysis()
+        
     
     with st.sidebar:
-        get_elettra_status()
-
+        get_elettra_status()        
+        st.divider()
 
 if __name__ == "__main__":
     main()
