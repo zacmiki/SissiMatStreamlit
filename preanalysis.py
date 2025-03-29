@@ -236,13 +236,33 @@ def online_analysis():
     if st.session_state.get("display_state") == "normalized":
         st.subheader("Normalized Spectrum")
         
-        # Slider initialization
+        # Initialize range for cutting
         min_x, max_x = st.session_state["cut_range"]
-        cut_range = st.slider(
-            "Select Cut Range (cm⁻¹)", 
-            min_value=int(min_x), max_value=int(max_x), 
-            value=(int(min_x), int(max_x)), step=10
-        )
+        
+        # Allow user to select cutting method
+        cut_method = st.radio("Choose Cut Range Method:", ["Slider", "Manual Entry"], horizontal=True)
+        
+        if cut_method == "Slider":
+            # Slider for cutting range selection
+            cut_range = st.slider(
+                "Select Cut Range (cm⁻¹)", 
+                min_value=int(min_x), max_value=int(max_x), 
+                value=(int(min_x), int(max_x)), step=10
+            )
+        else:
+            # Manual entry for cutting range
+            col1, col2 = st.columns(2)
+            with col1:
+                cut_min = st.number_input("Min Cut Value (cm⁻¹)", 
+                                         min_value=int(min_x), 
+                                         max_value=int(max_x),
+                                         value=int(min_x))
+            with col2:
+                cut_max = st.number_input("Max Cut Value (cm⁻¹)", 
+                                         min_value=int(min_x), 
+                                         max_value=int(max_x),
+                                         value=int(max_x))
+            cut_range = (cut_min, cut_max)
 
         # Apply cutting dynamically
         cut_dataset = cut_spectrum(st.session_state["normalized_spectrum"], *cut_range)
