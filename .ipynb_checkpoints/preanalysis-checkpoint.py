@@ -3,94 +3,84 @@ import xarray as xr
 import numpy as np
 import plotly.graph_objects as go
 import pandas as pd
-#from scipy import sparse
-#from scipy.sparse import linalg
-#from numpy.linalg import norm
+from scipy import sparse
+from scipy.sparse import linalg
+from numpy.linalg import norm
 from sissi_xarrays import graphSSC_xArray, LoadSSC_xArray, cut_spectrum
-from baselinesliders import baseline_arPLS
-import os
 
-# -----------------------------
 st.set_page_config(layout="wide")
 
-# ---------------- HELPER FUNCTIONS -----------------
-def process_uploaded_files(uploaded_files, key):
+# ---------------- BASELINE SUBTRACTION FUNCTION -----------------
+def baseline_arPLS(y, ratio=1e-6, lam=1e03, niter=30, full_output=False):
     """
-    Processes multiple uploaded OPUS files, computes average SSC values,
-    and stores the result in session state.
+    Adaptive Robust Penalized Least Squares (arPLS) baseline estimation.
     
     Args:
-        uploaded_files (list): List of uploaded files
-        key (str): Key identifier ('sample' or 'ref')
+        y (np.ndarray): Input signal
+        ratio (float): Convergence criterion
+        lam (float): Smoothness parameter
+        niter (int): Maximum number of iterations
+        full_output (bool): Return additional information if True
+    
+    Returns:
+        np.ndarray or tuple: Estimated baseline or (baseline, residual, info)
     """
-    if uploaded_files and len(uploaded_files) > 0:
-        # Store file names
-        file_names = [file.name for file in uploaded_files]
-        st.session_state[f"fileloaded_{key}"] = file_names
+    L = len(y)
+
+    diag = np.ones(L - 2)
+    D = sparse.spdiags([diag, -2*diag, diag], [0, -1, -2], L, L - 2)
+
+    H = lam * D.dot(D.T)  # Smoothness matrix
+
+    w = np.ones(L)
+    W = sparse.spdiags(w, 0, L, L)
+
+    crit = 1
+    count = 0
+
+    while crit > ratio:
+        z = linalg.spsolve(W + H, W * y)
+        d = y - z
+        dn = d[d < 0]
+
+        m = np.mean(dn)
+        s = np.std(dn)
+
+        w_new = 1 / (1 + np.exp(2 * (d - (2*s - m))/s))
+
+        crit = norm(w_new - w) / norm(w)
+
+        w = w_new
+        W.setdiag(w)  # Update diagonal values
+
+        count += 1
+
+        if count > niter:
+            st.warning('Maximum number of iterations exceeded')
+            break
+
+    if full_output:
+        info = {'num_iter': count, 'stop_criterion': crit}
+        return z, d, info
+    else:
+        return z
+
+# ---------------- HELPER FUNCTIONS -----------------
+def process_uploaded_file(uploaded_file, key):
+    """Processes an uploaded OPUS file and stores the dataset in session state."""
+    if uploaded_file is not None:
+        file_name = uploaded_file.name
+        st.session_state[f"fileloaded_{key}"] = file_name
+        file_extension = file_name.split(".")[-1]
         
-        datasets = []
-        valid_files_count = 0
-        
-        for i, uploaded_file in enumerate(uploaded_files):
-            file_name = uploaded_file.name
-            file_extension = file_name.split(".")[-1]
-            
-            if file_extension.isdigit():
-                # Save temporary file
-                temp_file = f"temp_{i}.opus"
-                with open(temp_file, "wb") as f:
-                    f.write(uploaded_file.getbuffer())
+        if file_extension.isdigit():
+            with open("temp.opus", "wb") as f:
+                f.write(uploaded_file.getbuffer())
                 
-                # Load dataset
-                try:
-                    dataset = LoadSSC_xArray(temp_file)
-                    datasets.append(dataset)
-                    valid_files_count += 1
-                except Exception as e:
-                    st.error(f"Error loading {file_name}: {str(e)}")
-                
-                # Clean up temp file
-                try:
-                    os.remove(temp_file)
-                except:
-                    pass
-            else:
-                st.write(f":red[Skipping {file_name}: not a valid OPUS file (needs integer extension).]")
-        
-        if valid_files_count > 0:
-            # Check if all datasets have the same x coordinates
-            x_values = datasets[0].x.values
-            all_same_x = all(np.allclose(ds.x.values, x_values) for ds in datasets)
-            
-            if not all_same_x:
-                st.error("⚠️ Not all spectra have the same x coordinates. Cannot average.")
-                return
-            
-            # Stack SSC values and compute average
-            ssc_values = np.vstack([ds.ssc.values for ds in datasets])
-            avg_ssc = np.mean(ssc_values, axis=0)
-            
-            # Create a new dataset with averaged SSC values
-            avg_dataset = xr.Dataset(
-                {'ssc': (('x',), avg_ssc)},
-                coords={'x': x_values}
-            )
-            
-            # Store the averaged dataset
-            st.session_state[f"dataset_{key}"] = avg_dataset
-            
-            st.success(f"✅ Successfully averaged {valid_files_count} files for {key}!")
-            
-            # Return metadata for display
-            return {
-                'count': valid_files_count,
-                'filenames': file_names,
-                'ssc_shape': avg_ssc.shape
-            }
+            dataset = LoadSSC_xArray("temp.opus")
+            st.session_state[f"dataset_{key}"] = dataset  # Store dataset
         else:
-            st.error("⚠️ No valid files were loaded.")
-            
-    return None
+            st.write(":red[Please upload a file with an integer extension.]")
 
 def normalize_Opus_Datasets(sample, reference):
     """
@@ -120,43 +110,13 @@ def normalize_Opus_Datasets(sample, reference):
         )
         
         # Store the normalized dataset
+        st.session_state["dataset_sample"] = normalized_dataset
         st.session_state["normalized_spectrum"] = normalized_dataset
         st.session_state["cut_range"] = (normalized_dataset.x.values.min(), normalized_dataset.x.values.max())
         st.session_state["display_state"] = "normalized"
         st.success("✅ Normalization successful!")
     else:
         st.error("⚠️ Please upload both Sample and Reference Spectra before normalizing.")
-
-def plot_normalized_spectrum(dataset):
-    """
-    Plot the normalized spectrum.
-    
-    Args:
-        dataset (xr.Dataset): Normalized dataset with intensity values
-        
-    Returns:
-        go.Figure: Plotly figure with the normalized spectrum
-    """
-    fig = go.Figure()
-    
-    fig.add_trace(go.Scatter(
-        x=dataset.x.values, y=dataset.intensity.values,
-        mode='lines',
-        name='Normalized Spectrum'
-    ))
-    
-    fig.update_layout(
-        title='Normalized Spectrum',
-        xaxis_title='Wavenumber (cm⁻¹)',
-        yaxis_title='Normalized Intensity',
-        autosize=True,
-        height=450
-    )
-    
-    fig.update_xaxes(showline=True, linewidth=1, linecolor="white", showgrid=True, mirror=True)
-    fig.update_yaxes(showline=True, linewidth=1, linecolor="white", showgrid=True, mirror=True)
-    
-    return fig
 
 def save_spectrum(dataset, filename):
     """
@@ -240,26 +200,6 @@ def plot_baseline_subtraction(x, intensity, baseline, baseline_subtracted):
 # ---------------- MAIN FUNCTION -----------------
 def online_analysis():
     
-    st.markdown(
-        '''
-        <div style="
-            background-color:#183927; 
-            padding:20px; 
-            border-radius:5px; 
-            display: inline-block; 
-            width: fit-content;
-            max-width: 80%; /* Adjust width limit if needed */
-        ">
-            <b>Before Starting each new Preanalysis,</b>
-            <b><font color="yellow">it is advisable for you to RESET THE CACHE</b><br></font>
-            and remove the previously loaded files.
-        </div>
-        ''', 
-        unsafe_allow_html=True
-    )
-    
-    st.divider()
-    
     if st.button("Reset All"):
         st.session_state.clear()
         st.rerun()
@@ -267,38 +207,24 @@ def online_analysis():
     col1, col2 = st.columns(2)  # Two side-by-side columns
 
     with col1:
-        st.subheader("Sample Spectra")
-        sample_spectra = st.file_uploader("Choose OPUS files", 
-                                          key="dataspectra", 
-                                          accept_multiple_files=True,
-                                          type=None)  # No type restriction, we'll check extensions
-        
-        if sample_spectra:
-            sample_info = process_uploaded_files(sample_spectra, "sample")
-            if sample_info:
-                st.info(f"Loaded {sample_info['count']} sample files. Computed average spectrum.")
+        st.subheader("Sample Spectrum")
+        sample_spectrum = st.file_uploader("Choose an OPUS file", key="dataspectrum")
+        process_uploaded_file(sample_spectrum, "sample")
 
     with col2:
-        st.subheader("Background Spectra")
-        ref_spectra = st.file_uploader("Choose OPUS files", 
-                                       key="refspectra", 
-                                       accept_multiple_files=True,
-                                       type=None)
-        
-        if ref_spectra:
-            ref_info = process_uploaded_files(ref_spectra, "ref")
-            if ref_info:
-                st.info(f"Loaded {ref_info['count']} reference files. Computed average spectrum.")
+        st.subheader("Background Spectrum")
+        ref_spectrum = st.file_uploader("Choose an OPUS file", key="refspectrum")
+        process_uploaded_file(ref_spectrum, "ref")
 
-    # ---------------- SHOW SPECTRA -----------------
+    # ---------------- SHOW RAW SPECTRA -----------------
     col1, col2 = st.columns(2)
     if "dataset_sample" in st.session_state:
         with col1:
-            graphSSC_xArray(st.session_state["dataset_sample"], "Averaged Sample Spectrum")
+            graphSSC_xArray(st.session_state["dataset_sample"], "Sample Spectrum")
     
     if "dataset_ref" in st.session_state:
         with col2:
-            graphSSC_xArray(st.session_state["dataset_ref"], "Averaged Reference Spectrum")
+            graphSSC_xArray(st.session_state["dataset_ref"], "Reference Spectrum")
 
     # ---------------- ACTION BUTTON -----------------
     if "dataset_sample" in st.session_state and "dataset_ref" in st.session_state:
@@ -338,12 +264,8 @@ def online_analysis():
                                          value=int(max_x))
             cut_range = (cut_min, cut_max)
 
-        # Apply cutting dynamically to create cut_dataset
+        # Apply cutting dynamically
         cut_dataset = cut_spectrum(st.session_state["normalized_spectrum"], *cut_range)
-        
-        # Display the cut normalized spectrum
-        normalized_fig = plot_normalized_spectrum(cut_dataset)
-        st.plotly_chart(normalized_fig, use_container_width=True)
         
         # Baseline Subtraction Section
         st.subheader("Baseline Subtraction")
@@ -399,33 +321,12 @@ def online_analysis():
         col1, col2 = st.columns(2)
         with col1:
             if st.button("Save Baseline Subtracted Spectrum"):
-                # Use first filename from the list for naming
-                if isinstance(st.session_state['fileloaded_sample'], list) and len(st.session_state['fileloaded_sample']) > 0:
-                    base_filename = st.session_state['fileloaded_sample'][0].split('.')[0]
-                    if len(st.session_state['fileloaded_sample']) > 1:
-                        base_filename += f"_avgd_bkgsubtracted"
-                else:
-                    base_filename = "averaged_spectrum"
-                
-                filename = f"{base_filename}_bkgsubtracted.csv"
-                
-                # Include averaged SSC data in the saved file
-                sample_ssc = st.session_state["dataset_sample"].ssc.values
-                ref_ssc = st.session_state["dataset_ref"].ssc.values
-                
-                # Create DataFrame with all data
+                filename = f"baseline_subtracted_{st.session_state['fileloaded_sample'].split('.')[0]}.csv"
                 baseline_df = pd.DataFrame({
                     'x': x_values, 
-                    'sample_ssc': sample_ssc if len(sample_ssc) == len(x_values) else np.interp(x_values, st.session_state["dataset_sample"].x.values, sample_ssc),
-                    'reference_ssc': ref_ssc if len(ref_ssc) == len(x_values) else np.interp(x_values, st.session_state["dataset_ref"].x.values, ref_ssc),
-                    'intensity': intensity_values,
+                    'original_intensity': intensity_values,
                     'baseline': baseline,
-                    'intensity_bcksubtr': baseline_subtracted
+                    'baseline_subtracted': baseline_subtracted
                 })
-                
                 baseline_df.to_csv(filename, index=False)
                 st.success(f"✅ File saved as {filename}")
-
-# Call the main function (can be replaced with `if __name__ == "__main__":`
-# if this is imported as a module)
-online_analysis()

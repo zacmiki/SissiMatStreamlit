@@ -1,9 +1,12 @@
+import streamlit as st
 import ipywidgets as widgets
 from IPython.display import display
 import numpy as np
+from numpy.linalg import norm
 import matplotlib.pyplot as plt
 import xarray as xr
 import pandas as pd
+from scipy import sparse
 
 # -------------------------------------------------------------
 def cut_spectrum(dataset, begin, end):
@@ -13,18 +16,27 @@ def cut_spectrum(dataset, begin, end):
     return datasetcut
 # -------------------------------------------------------------
 
-def baseline_arPLS(y, ratio=1e-6, lam=100, niter=10, full_output=False):
-    from scipy import sparse
-    from scipy.sparse import linalg
-    import numpy as np
-    from numpy.linalg import norm
+# ---------------- BASELINE SUBTRACTION FUNCTION -----------------
+def baseline_arPLS(y, ratio=1e-6, lam=1e03, niter=30, full_output=False):
+    """
+    Adaptive Robust Penalized Least Squares (arPLS) baseline estimation.
     
+    Args:
+        y (np.ndarray): Input signal
+        ratio (float): Convergence criterion
+        lam (float): Smoothness parameter
+        niter (int): Maximum number of iterations
+        full_output (bool): Return additional information if True
+    
+    Returns:
+        np.ndarray or tuple: Estimated baseline or (baseline, residual, info)
+    """
     L = len(y)
 
     diag = np.ones(L - 2)
     D = sparse.spdiags([diag, -2*diag, diag], [0, -1, -2], L, L - 2)
 
-    H = lam * D.dot(D.T)  # The transposes are flipped w.r.t the Algorithm on pg. 252 -- Analyst, 2015, 140, 250 ---
+    H = lam * D.dot(D.T)  # Smoothness matrix
 
     w = np.ones(L)
     W = sparse.spdiags(w, 0, L, L)
@@ -33,7 +45,7 @@ def baseline_arPLS(y, ratio=1e-6, lam=100, niter=10, full_output=False):
     count = 0
 
     while crit > ratio:
-        z = linalg.spsolve(W + H, W * y)
+        z = sparse.linalg.spsolve(W + H, W * y)
         d = y - z
         dn = d[d < 0]
 
@@ -45,21 +57,20 @@ def baseline_arPLS(y, ratio=1e-6, lam=100, niter=10, full_output=False):
         crit = norm(w_new - w) / norm(w)
 
         w = w_new
-        W.setdiag(w)  # Do not create a new matrix, just update diagonal values
+        W.setdiag(w)  # Update diagonal values
 
         count += 1
 
         if count > niter:
-            print('Maximum number of iterations exceeded')
+            st.warning('Maximum number of iterations exceeded')
             break
 
     if full_output:
         info = {'num_iter': count, 'stop_criterion': crit}
         return z, d, info
     else:
-        return z
-    
-''' ------------------------------------------------------ '''
+        return z    
+
 # -------------------------------------------------------------
 
 def LoadSSC_xArray(filepath):

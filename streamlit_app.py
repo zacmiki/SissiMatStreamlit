@@ -35,7 +35,7 @@ def main():
             "Online Basic Data Analysis",
             "Graph Opus File",
             "Opus File Inspector",
-            "OPUS Spectra Averaging",
+            #"OPUS Spectra Averaging",
             "DAC Utilities",
             "Fit Ruby",
             "Convert OPUS Files"
@@ -50,8 +50,8 @@ def main():
         graphopus()
     elif selected_option == "Opus File Inspector":
         inspectopusfile()
-    elif selected_option == "OPUS Spectra Averaging":
-        averagespectrapage()
+    #elif selected_option == "OPUS Spectra Averaging":
+        #averagespectrapage()
     elif selected_option == "Fit Ruby":
         rubyfitls()
     elif selected_option == "Convert OPUS Files":
