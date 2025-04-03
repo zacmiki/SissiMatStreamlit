@@ -126,6 +126,7 @@ def normalize_Opus_Datasets(sample, reference):
         st.success("✅ Normalization successful!")
     else:
         st.error("⚠️ Please upload both Sample and Reference Spectra before normalizing.")
+'''
 
 def plot_normalized_spectrum(dataset):
     """
@@ -157,7 +158,7 @@ def plot_normalized_spectrum(dataset):
     fig.update_yaxes(showline=True, linewidth=1, linecolor="white", showgrid=True, mirror=True)
     
     return fig
-'''
+    
 def normalize_Opus_Datasets(sample, reference):
     """
     Performs normalization: sample spectrum divided by reference spectrum.
