@@ -91,7 +91,7 @@ def process_uploaded_files(uploaded_files, key):
             st.error("⚠️ No valid files were loaded.")
             
     return None
-
+'''
 def normalize_Opus_Datasets(sample, reference):
     """
     Performs normalization: sample spectrum divided by reference spectrum.
@@ -157,28 +157,100 @@ def plot_normalized_spectrum(dataset):
     fig.update_yaxes(showline=True, linewidth=1, linecolor="white", showgrid=True, mirror=True)
     
     return fig
-
-def save_spectrum(dataset, filename):
+'''
+def normalize_Opus_Datasets(sample, reference):
     """
-    Saves the xarray dataset to a CSV file.
-    Includes x, ssc, and intensity if available.
+    Performs normalization: sample spectrum divided by reference spectrum.
+    Creates a new xarray dataset with normalized data.
     
     Args:
-        dataset (xr.Dataset): Input dataset
-        filename (str): Output filename
+        sample (xr.Dataset): Sample spectrum dataset
+        reference (xr.Dataset): Reference spectrum dataset
     """
-    if dataset is not None:
-        # Prepare data for CSV
-        data = {'x': dataset.x.values, 'ssc': dataset.ssc.values}
+    if sample is not None and reference is not None:
+        # Get x values for both datasets
+        sample_x = sample.x.values
+        reference_x = reference.x.values
         
-        # Add intensity if it exists
-        if 'intensity' in dataset:
-            data['intensity'] = dataset.intensity.values
+        # Check if arrays have same shape first
+        if sample_x.shape != reference_x.shape:
+            st.warning("⚠️ Sample and Reference spectra have different x coordinates. Attempting interpolation...")
+            
+            # Find common range
+            common_min = max(sample_x.min(), reference_x.min())
+            common_max = min(sample_x.max(), reference_x.max())
+            
+            # Check if there's an overlap
+            if common_min >= common_max:
+                st.error("❌ No overlap between sample and reference spectra x ranges!")
+                return
+            
+            # Create common x grid (using the denser of the two)
+            if len(sample_x) >= len(reference_x):
+                common_x = sample_x[
+                    (sample_x >= common_min) & (sample_x <= common_max)
+                ]
+            else:
+                common_x = reference_x[
+                    (reference_x >= common_min) & (reference_x <= common_max)
+                ]
+            
+            if len(common_x) < 10:  # Just a safety check
+                st.error("❌ Insufficient overlap between spectra!")
+                return
+            
+            # Interpolate both spectra to common grid
+            from scipy.interpolate import interp1d
+            
+            sample_interp = interp1d(
+                sample_x, sample.ssc.values, 
+                bounds_error=False, fill_value="extrapolate"
+            )(common_x)
+            
+            reference_interp = interp1d(
+                reference_x, reference.ssc.values, 
+                bounds_error=False, fill_value="extrapolate"
+            )(common_x)
+            
+            # Create normalized data
+            normalized_values = sample_interp / reference_interp
+            
+            # Create a new dataset with normalized data
+            normalized_dataset = xr.Dataset(
+                {
+                    'ssc': (('x',), sample_interp),  # Interpolated sample SSC
+                    'intensity': (('x',), normalized_values)  # Normalized data
+                },
+                coords={'x': common_x}
+            )
+            
+        else:
+            # Check if the arrays are close enough when shapes match
+            if not np.allclose(sample_x, reference_x, rtol=1e-5, atol=1e-8):
+                st.warning("⚠️ Sample and Reference x values differ slightly. Using sample x coordinates.")
+            
+            # Create normalized data
+            normalized_values = sample.ssc.values / reference.ssc.values
+            
+            # Create a new dataset with normalized data
+            normalized_dataset = xr.Dataset(
+                {
+                    'ssc': (('x',), sample.ssc.values),  # Original sample SSC
+                    'intensity': (('x',), normalized_values)  # Normalized data
+                },
+                coords={'x': sample_x}
+            )
         
-        df = pd.DataFrame(data)
-        df.to_csv(filename, index=False)
-        st.success(f"✅ File saved as {filename}")
+        # Store the normalized dataset
+        st.session_state["normalized_spectrum"] = normalized_dataset
+        st.session_state["cut_range"] = (normalized_dataset.x.values.min(), normalized_dataset.x.values.max())
+        st.session_state["display_state"] = "normalized"
+        st.success("✅ Normalization successful!")
+        
+    else:
+        st.error("⚠️ Please upload both Sample and Reference Spectra before normalizing.")
 
+# ---------------   PLOT BASELINE SUBTRACTION -------------------------
 def plot_baseline_subtraction(x, intensity, baseline, baseline_subtracted):
     """
     Creates a plotly figure for baseline subtraction visualization.
