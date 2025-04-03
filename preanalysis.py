@@ -422,9 +422,15 @@ def online_analysis():
                     'baseline': baseline,
                     'intensity_bcksubtr': baseline_subtracted
                 })
-                
-                baseline_df.to_csv(filename, index=False)
-                st.success(f"✅ File saved as {filename}")
+
+                # Create a download link instead of saving to disk
+                csv = baseline_df.to_csv(index=False)
+                st.download_button(
+                    label="📥 Download CSV File",
+                    data=csv,
+                    file_name=filename,
+                    mime="text/csv"
+                )
 
 # Call the main function (can be replaced with `if __name__ == "__main__":`
 # if this is imported as a module)
