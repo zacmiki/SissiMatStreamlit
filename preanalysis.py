@@ -425,10 +425,19 @@ def online_analysis():
         col1, col2, col3 = st.columns(3)
         
         with col1:
+            #Slider First
             lam = st.slider(
-                "Smoothness (λ)", 
+                "Slider Smoothness (λ)", 
                 min_value=1e03, max_value=1e10, 
                 value=1e05, format='%e', step=1e03
+            )
+            #Manual Entry
+            lam = st.number_input(
+                "Or Enter Manually",
+                min_value=1e03, max_value=1e10,
+                value = lam,
+                format='%.3f',
+                step = 1e03
             )
         
         with col2:
