@@ -54,7 +54,7 @@ def graphSSC_xArray(dataset, title):
     fig.update_xaxes(showline=True, linewidth=2, linecolor="white", showgrid=True, mirror=True)
     fig.update_yaxes(showline=True, linewidth=2, linecolor="white", zeroline=True, zerolinecolor="brown", showgrid=True, mirror=True)
 
-    st.plotly_chart(fig, clear_figure=True)  # Clears previous graph before displaying a new one
+    st.plotly_chart(fig)  # Clears previous graph before displaying a new one
     
 def LoadSSC_xArray(filepath):
     loaded = loadSSC(filepath)
