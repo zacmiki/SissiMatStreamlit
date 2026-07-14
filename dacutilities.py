@@ -27,7 +27,7 @@ def page2():
         rubypos = st.number_input(
             "",
             step=0.01,
-            format="%.2f",
+            format="%.3f",
             value=694.25,
             key="DACPress",
             label_visibility="collapsed",
