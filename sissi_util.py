@@ -135,7 +135,7 @@ def DACPress(wlength):
     """Returns the pressure in GPa - given the ruby line wavelength in nm"""
     A = float(1904)
     B = float(7.715)
-    R1 = float(694.19)
+    R1 = float(694.25)
 
     A1 = float(1870)
     B1 = float(5.63)
