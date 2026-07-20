@@ -28,7 +28,7 @@ def page2():
             "",
             step=0.01,
             format="%.3f",
-            value=694.25,
+            value=694.249,
             key="DACPress",
             label_visibility="collapsed",
         )
