@@ -1,7 +1,7 @@
 import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
-from lmfit.models import ConstantModel, LorentzianModel
+from lmfit.models import LinearModel, LorentzianModel
 import matplotlib.pyplot as plt
 from fitruby import load_rubyfile
 
@@ -10,10 +10,8 @@ from fitruby import load_rubyfile
 def try_lorentzian(
     data, l1_center, l1_amplitude, l1_sigma, l2_center, l2_amplitude, l2_sigma
 ):
-    background = ConstantModel(prefix="bkg_")  # preparing the background parameter
-    pars = background.guess(
-        data[:, 1], x=data[:, 0]
-    )  # guessing the background for my data
+    background = LinearModel(prefix="bkg_")
+    pars = background.guess(data[:, 1], x=data[:, 0])
 
     l1 = LorentzianModel(prefix="l1_")
     pars.update(l1.make_params())
@@ -59,69 +57,56 @@ def rubyfitls():
         # No file loaded yet - show uploader
         data = load_rubyfile()
 
+    def _param_widget(label, key, min_v, max_v, default, step):
+        col_l, col_s, col_n = st.columns([1, 3, 1])
+        current = st.session_state.get(key, default)
+        with col_l:
+            st.markdown(f"**{label}**")
+        with col_s:
+            slider_val = st.slider(
+                "", min_v, max_v, current, step=step, label_visibility="collapsed"
+            )
+        with col_n:
+            num_val = st.number_input(
+                "", min_v, max_v, current, step=step, label_visibility="collapsed"
+            )
+        val = num_val if num_val != current else slider_val
+        st.session_state[key] = val
+        return val
+
     # Fitting section
     if st.session_state.file_loaded and data is not None:
         st.markdown("---")
         st.markdown("### 🔧 Fit Parameters")
 
-        col1, col2, col3, col4, col5, col6 = st.columns(6)
+        col_left, col_right = st.columns(2)
 
-        with col1:
-            l1_center = st.slider(
-                "Lor1 Center",
-                688.0,
-                710.0,
-                float(st.session_state.get("l1_center", 692.5)),
-                step=0.05,
-            )
+        with col_left:
+            st.markdown("**Lorentzian 1**")
+            l1_center = _param_widget("Center", "l1_center", 688.0, 710.0, 692.5, 0.05)
+            l1_amplitude = _param_widget("Ampl", "l1_amplitude", 200.0, 50000.0, 4400.0, 50.0)
+            l1_sigma = _param_widget("Sigma", "l1_sigma", 0.01, 2.0, 0.33, 0.01)
 
-        with col2:
-            l1_amplitude = st.slider(
-                "Lor1 Amplitude",
-                200,
-                50000,
-                int(st.session_state.get("l1_amplitude", 4400)),
-                step=50,
-            )
+        with col_right:
+            st.markdown("**Lorentzian 2**")
+            l2_center = _param_widget("Center", "l2_center", 688.0, 710.0, 694.5, 0.05)
+            l2_amplitude = _param_widget("Ampl", "l2_amplitude", 200.0, 50000.0, 7900.0, 50.0)
+            l2_sigma = _param_widget("Sigma", "l2_sigma", 0.02, 2.0, 0.38, 0.01)
 
-        with col3:
-            l1_sigma = st.slider(
-                "Lor1 Sigma",
-                0.01,
-                2.0,
-                float(st.session_state.get("l1_sigma", 0.33)),
-                step=0.01,
-            )
+        # Select X range — fit and plot will only use this window
+        x_range = st.slider(
+            "X-axis range (fit & plot window)",
+            float(data[:, 0].min()),
+            float(data[:, 0].max()),
+            (float(data[:, 0].min()), float(data[:, 0].max())),
+        )
 
-        with col4:
-            l2_center = st.slider(
-                "Lor2 Center",
-                688.0,
-                710.0,
-                float(st.session_state.get("l2_center", 694.5)),
-                step=0.05,
-            )
-
-        with col5:
-            l2_amplitude = st.slider(
-                "Lor2 Amplitude",
-                200,
-                50000,
-                int(st.session_state.get("l2_amplitude", 7900)),
-                step=50,
-            )
-
-        with col6:
-            l2_sigma = st.slider(
-                "Lor2 Sigma",
-                0.02,
-                2.0,
-                float(st.session_state.get("l2_sigma", 0.38)),
-                step=0.01,
-            )
+        # Mask data to the selected range
+        mask = (data[:, 0] >= x_range[0]) & (data[:, 0] <= x_range[1])
+        fd = data[mask]
 
         model, init, pars = try_lorentzian(
-            data, l1_center, l1_amplitude, l1_sigma, l2_center, l2_amplitude, l2_sigma
+            fd, l1_center, l1_amplitude, l1_sigma, l2_center, l2_amplitude, l2_sigma
         )
 
         # Preview plot with Plotly
@@ -132,8 +117,8 @@ def rubyfitls():
         # Scatter plot of the data
         fig.add_trace(
             go.Scatter(
-                x=data[:, 0],
-                y=data[:, 1],
+                x=fd[:, 0],
+                y=fd[:, 1],
                 mode="markers",
                 name="Data",
                 showlegend=False,
@@ -143,7 +128,7 @@ def rubyfitls():
         # Adding the line graph of initial fit
         fig.add_trace(
             go.Scatter(
-                x=data[:, 0],
+                x=fd[:, 0],
                 y=init,
                 mode="lines",
                 line=dict(color="red"),
@@ -152,27 +137,20 @@ def rubyfitls():
             )
         )
 
-        # Set x-axis range manually
-        x_range = st.slider(
-            "X-axis range",
-            float(data[:, 0].min()),
-            float(data[:, 0].max()),
-            (float(data[:, 0].min()), float(data[:, 0].max())),
-        )
-
         fig.update_layout(
             title="Ruby Fluorescence - Lorentzian Fit Preview",
             xaxis_title="Wavelength (nm)",
             yaxis_title="Intensity (counts)",
             xaxis=dict(range=x_range),
+            yaxis=dict(range=[-500, None]),
         )
 
         st.plotly_chart(fig, use_container_width=True)
 
         # Fit button
         if st.button("Fit with current parameters", type="primary"):
-            result = model.fit(data[:, 1], pars, x=data[:, 0])
-            comps = result.eval_components(x=data[:, 0])
+            result = model.fit(fd[:, 1], pars, x=fd[:, 0])
+            comps = result.eval_components(x=fd[:, 0])
 
             # Update session state with fitted values
             st.session_state.l1_center = float(result.params["l1_center"].value)
@@ -182,7 +160,7 @@ def rubyfitls():
             st.session_state.l2_amplitude = float(result.params["l2_amplitude"].value)
             st.session_state.l2_sigma = float(result.params["l2_sigma"].value)
 
-            rsquared = round(1 - (result.residual.var() / np.var(data[:, 1])), 4)
+            rsquared = round(1 - (result.residual.var() / np.var(fd[:, 1])), 4)
 
             # Display results
             st.success("Fit completed!")
@@ -194,8 +172,8 @@ def rubyfitls():
             with col3:
                 st.metric("R²", f"{rsquared}")
 
-            x = data[:, 0]
-            y = data[:, 1]
+            x = fd[:, 0]
+            y = fd[:, 1]
 
             # Matplotlib plot
             fig, axes = plt.subplots(1, 2, figsize=(18, 9))
@@ -203,7 +181,8 @@ def rubyfitls():
             axes[0].plot(x, result.best_fit, "-", label="best fit")
             axes[0].plot(x, y - result.best_fit, "--", label="Residuals")
 
-            axes[0].set_xlim(690, 700)
+            axes[0].set_xlim(x_range[0], x_range[1])
+            axes[0].set_ylim(bottom=-500)
             axes[0].set_xlabel("Wavelength (nm)")
             axes[0].set_ylabel("Intensity")
             axes[0].grid(which="major", axis="y", linewidth=0.2)
@@ -214,7 +193,8 @@ def rubyfitls():
             axes[1].plot(x, comps["l1_"], "--", label="Lorentzian 1")
             axes[1].plot(x, comps["l2_"], "--", label="Lorentzian 2")
 
-            axes[1].set_xlim(690, 700)
+            axes[1].set_xlim(x_range[0], x_range[1])
+            axes[1].set_ylim(bottom=-500)
             axes[1].set_xlabel("Wavelength (nm)")
             axes[1].grid(which="major", axis="y", linewidth=0.2)
             axes[1].grid(which="both", axis="x", lw=0.2)
