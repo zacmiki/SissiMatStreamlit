@@ -10,9 +10,6 @@ from sissi_xarrays import graphSSC_xArray, LoadSSC_xArray, cut_spectrum
 from baselinesliders import baseline_arPLS
 import os
 
-# -----------------------------
-st.set_page_config(layout="wide")
-
 # ---------------- HELPER FUNCTIONS -----------------
 def process_uploaded_files(uploaded_files, key):
     """
@@ -513,7 +510,3 @@ def online_analysis():
                     file_name=filename,
                     mime="text/csv"
                 )
-
-# Call the main function (can be replaced with `if __name__ == "__main__":`
-# if this is imported as a module)
-online_analysis()

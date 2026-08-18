@@ -1,17 +1,20 @@
 import streamlit as st
 
+st.set_page_config(
+    page_title="SISSI-Mat IR Utilities",
+    page_icon="🌈",
+    layout="wide",
+)
+
 from converters import page1
 from dacutilities import page2
 from OpusGraher import graphopus
 from Opusinspector import inspectopusfile
 from averagespectra import averagespectrapage, get_elettra_status
 from fitruby_ls import rubyfitls
-
 from preanalysis import online_analysis
-
 from ConvertFiles import convert_opus_files_in_directory
-
-from ringparameters import *
+from sissimat.pages.spectral_processing import render_spectral_processing_lab
 
 # Set up the sidebar.  -  SIDEBAR ----------- SIDEBAR ------------ SIDEBAR OPTIONS
 # st.set_page_config(layout="wide")
@@ -27,12 +30,12 @@ def main():
         st.session_state.current_page = "IR Converters"
 
     # Section: IR Converters
-    st.sidebar.markdown("### 🌈 IR Converters")
+    st.sidebar.markdown("### 🌈 IR Utilities")
     if st.sidebar.button("IR Converters", use_container_width=True):
         st.session_state.current_page = "IR Converters"
 
-    # Section: FTIR OPUS Analysis
-    st.sidebar.markdown("### 📂 FTIR OPUS Analysis")
+    # Section: OPUS files
+    st.sidebar.markdown("### 📂 OPUS Files")
     if st.sidebar.button("OPUS File Grapher", use_container_width=True):
         st.session_state.current_page = "OPUS File Grapher"
     if st.sidebar.button("OPUS File Inspector", use_container_width=True):
@@ -41,8 +44,13 @@ def main():
         st.session_state.current_page = "OPUS File Converter"
     if st.sidebar.button("OPUS Spectra Averaging", use_container_width=True):
         st.session_state.current_page = "OPUS Spectra Averaging"
-    if st.sidebar.button("Online Basic Data Analysis", use_container_width=True):
-        st.session_state.current_page = "Online Basic Data Analysis"
+
+    # Section: Data processing
+    st.sidebar.markdown("### 🔬 Data Processing")
+    if st.sidebar.button("Quick Pre-analysis", use_container_width=True):
+        st.session_state.current_page = "Quick Pre-analysis"
+    if st.sidebar.button("Spectral Processing Lab", use_container_width=True):
+        st.session_state.current_page = "Spectral Processing Lab"
 
     # Section: DAC Tools
     st.sidebar.markdown("### 💎 DAC Tools")
@@ -70,8 +78,10 @@ def main():
         averagespectrapage()
     elif selected_option == "Fit Ruby":
         rubyfitls()
-    elif selected_option == "Online Basic Data Analysis":
+    elif selected_option in ("Quick Pre-analysis", "Online Basic Data Analysis"):
         online_analysis()
+    elif selected_option == "Spectral Processing Lab":
+        render_spectral_processing_lab()
 
     with st.sidebar:
         get_elettra_status()

@@ -1,4 +1,5 @@
 brukeropusreader
+streamlit
 numpy
 pandas
 opusFC
@@ -6,6 +7,7 @@ scipy
 matplotlib
 plotly
 bs4
+requests
 lmfit
 xarray
 ipywidgets
