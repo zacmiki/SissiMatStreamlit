@@ -136,7 +136,7 @@ def DACPress(wlength):
     A = float(1904)
     B = float(7.715)
     #R1 = float(694.248)   put the right value for the ZERO Pressure
-    R1 = float(694.248)
+    R1 = float(694.19)
 
     A1 = float(1870)
     B1 = float(5.63)
