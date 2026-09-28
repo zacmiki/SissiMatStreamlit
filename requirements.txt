@@ -1,5 +1,5 @@
 brukeropusreader
-streamlit
+streamlit>=1.49
 numpy
 pandas
 opusFC
