@@ -11,3 +11,4 @@ requests
 lmfit
 xarray
 ipywidgets
+pyserial

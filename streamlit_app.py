@@ -15,6 +15,10 @@ from fitruby_ls import rubyfitls
 from preanalysis import online_analysis
 from ConvertFiles import convert_opus_files_in_directory
 from sissimat.pages.spectral_processing import render_spectral_processing_lab
+from sissimat.pages.temperature_reader import (
+    close_temperature_reader,
+    render_temperature_reader,
+)
 
 # Set up the sidebar.  -  SIDEBAR ----------- SIDEBAR ------------ SIDEBAR OPTIONS
 # st.set_page_config(layout="wide")
@@ -59,10 +63,18 @@ def main():
     if st.sidebar.button("Fit Ruby", use_container_width=True):
         st.session_state.current_page = "Fit Ruby"
 
+    # Section: Instrumentation
+    st.sidebar.markdown("### 🌡️ Instrumentation")
+    if st.sidebar.button("T Reading", use_container_width=True):
+        st.session_state.current_page = "T Reading"
+
     st.sidebar.markdown("---")
 
     # Get current selection
     selected_option = st.session_state.current_page
+
+    if selected_option != "T Reading":
+        close_temperature_reader()
 
     if selected_option == "IR Converters":
         page1()
@@ -82,6 +94,8 @@ def main():
         online_analysis()
     elif selected_option == "Spectral Processing Lab":
         render_spectral_processing_lab()
+    elif selected_option == "T Reading":
+        render_temperature_reader()
 
     with st.sidebar:
         get_elettra_status()

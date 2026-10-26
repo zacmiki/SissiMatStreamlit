@@ -10,6 +10,7 @@ Streamlit utilities for routine infrared-spectroscopy workflows at the SISSI-Mat
 - Reproducible spectral processing with CSV and JSON recipe export/replay
 - Batch recipe processing with background mapping, quality-control previews, and ZIP export
 - Diamond-anvil-cell and ruby-fluorescence utilities
+- Live Lake Shore 331 temperature acquisition with selective A/B display and CSV snapshots
 
 ## Project structure
 
