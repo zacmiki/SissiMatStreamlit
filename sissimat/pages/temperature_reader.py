@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pandas as pd
 import plotly.graph_objects as go
 import serial
@@ -12,7 +10,6 @@ import streamlit as st
 from sissimat.instruments.lakeshore331 import (
     LakeShore331,
     TemperatureReading,
-    append_temperature_snapshot,
     available_serial_ports,
 )
 
@@ -127,7 +124,26 @@ def _live_acquisition(display: str, ignore_zero: bool) -> None:
         )
 
 
-def _store_current_value(output_path: str, note: str) -> None:
+def _temperature_table_row(
+    reading: TemperatureReading, point_number: int, channel: str
+) -> dict[str, int | float | str]:
+    """Build one display/export row from the selected controller channel."""
+
+    normalized = channel.strip().upper()
+    if normalized == "A":
+        temperature = reading.channel_a_kelvin
+    elif normalized == "B":
+        temperature = reading.channel_b_kelvin
+    else:
+        raise ValueError("Channel must be A or B")
+    return {
+        "Point n": point_number,
+        "Temperature": temperature,
+        "Time": reading.timestamp.isoformat(timespec="seconds"),
+    }
+
+
+def _store_current_value(channel: str) -> None:
     controller = st.session_state.get(CONTROLLER_KEY)
     if not st.session_state.get(RUNNING_KEY) or controller is None:
         st.error("Start an acquisition before storing a value.")
@@ -135,26 +151,21 @@ def _store_current_value(output_path: str, note: str) -> None:
     try:
         reading = controller.read_temperatures()
         _append_history(reading)
-        saved_path = append_temperature_snapshot(
-            output_path,
-            reading,
-            controller=st.session_state[IDENTITY_KEY],
-            serial_port=st.session_state[PORT_KEY],
-            note=note,
-        )
-    except (OSError, TimeoutError, RuntimeError, serial.SerialException, ValueError) as error:
+    except (
+        OSError,
+        TimeoutError,
+        RuntimeError,
+        serial.SerialException,
+        ValueError,
+    ) as error:
         st.error(f"Could not store the value: {error}")
         return
 
+    point_number = len(st.session_state[STORED_KEY]) + 1
     st.session_state[STORED_KEY].append(
-        {
-            "Time (UTC)": reading.timestamp.isoformat(timespec="seconds"),
-            "A (K)": reading.channel_a_kelvin,
-            "B (K)": reading.channel_b_kelvin,
-            "Note": note.strip(),
-        }
+        _temperature_table_row(reading, point_number, channel)
     )
-    st.success(f"Stored A and B in {saved_path}")
+    st.success(f"Point {point_number} added to the table from channel {channel}.")
 
 
 def render_temperature_reader() -> None:
@@ -243,32 +254,32 @@ def render_temperature_reader() -> None:
     if st.session_state[RUNNING_KEY]:
         _live_acquisition(display, ignore_zero)
 
-    st.subheader("Store a temperature snapshot")
-    output_path = st.text_input(
-        "CSV file",
-        value="temperature_snapshots.csv",
-        help="A relative path is saved from the directory where Streamlit was started.",
-    ).strip()
-    note = st.text_input(
-        "Experiment note (optional)",
-        placeholder="Sample, PID/heater condition, or FTIR acquisition name",
+    st.subheader("Temperature points")
+    table_channel = st.radio(
+        "Channel used for the Temperature column",
+        ["A", "B"],
+        horizontal=True,
+        key=f"{STATE_PREFIX}table_channel",
     )
     if st.button(
-        "Store Value",
+        "Add current value to table",
         type="primary",
-        disabled=not st.session_state[RUNNING_KEY] or not output_path,
+        disabled=not st.session_state[RUNNING_KEY],
     ):
-        _store_current_value(output_path, note)
+        _store_current_value(table_channel)
 
     stored = st.session_state[STORED_KEY]
     if stored:
-        st.markdown("#### Values stored during this session")
-        st.dataframe(pd.DataFrame(stored), hide_index=True, width="stretch")
-        path = Path(output_path).expanduser()
-        if path.is_file():
-            st.download_button(
-                "Download snapshot CSV",
-                data=path.read_bytes(),
-                file_name=path.name,
-                mime="text/csv",
-            )
+        table = pd.DataFrame(stored, columns=["Point n", "Temperature", "Time"])
+        st.caption("Temperature is in kelvin; Time is recorded in UTC.")
+        st.dataframe(table, hide_index=True, width="stretch")
+        st.download_button(
+            "Save table as CSV",
+            data=table.to_csv(index=False).encode("utf-8"),
+            file_name="temperature_points.csv",
+            mime="text/csv",
+        )
+    else:
+        st.caption(
+            "No points have been added yet. Nothing is written to disk automatically."
+        )

@@ -1,14 +1,11 @@
-import csv
-import tempfile
 import unittest
 from datetime import datetime, timezone
-from pathlib import Path
 
 from sissimat.instruments.lakeshore331 import (
     LakeShore331,
     TemperatureReading,
-    append_temperature_snapshot,
 )
+from sissimat.pages.temperature_reader import _temperature_table_row
 
 
 class FakeSerial:
@@ -50,33 +47,23 @@ class LakeShore331Tests(unittest.TestCase):
         self.assertEqual(reading.channel_b_kelvin, 234.56)
         self.assertEqual(fake.writes, [b"*IDN?\r\n", b"KRDG? A\r\n", b"KRDG? B\r\n"])
 
-    def test_snapshot_csv_gets_one_header_and_multiple_rows(self):
+    def test_temperature_table_row_uses_selected_channel(self):
         reading = TemperatureReading(
             datetime(2026, 10, 26, 12, 30, tzinfo=timezone.utc), 100.0, 200.0
         )
-        with tempfile.TemporaryDirectory() as directory:
-            output = Path(directory) / "temperatures.csv"
-            append_temperature_snapshot(
-                output,
-                reading,
-                controller="LSCI,MODEL331S,334187,061404",
-                serial_port="COM4",
-                note="before FTIR",
-            )
-            append_temperature_snapshot(
-                output,
-                reading,
-                controller="LSCI,MODEL331S,334187,061404",
-                serial_port="COM4",
-                note="after PID change",
-            )
+        row_a = _temperature_table_row(reading, 1, "A")
+        row_b = _temperature_table_row(reading, 2, "B")
 
-            with output.open(newline="", encoding="utf-8") as handle:
-                rows = list(csv.DictReader(handle))
-
-        self.assertEqual(len(rows), 2)
-        self.assertEqual(rows[0]["channel_a_kelvin"], "100.0")
-        self.assertEqual(rows[1]["note"], "after PID change")
+        self.assertEqual(
+            row_a,
+            {
+                "Point n": 1,
+                "Temperature": 100.0,
+                "Time": "2026-10-26T12:30:00+00:00",
+            },
+        )
+        self.assertEqual(row_b["Point n"], 2)
+        self.assertEqual(row_b["Temperature"], 200.0)
 
 
 if __name__ == "__main__":

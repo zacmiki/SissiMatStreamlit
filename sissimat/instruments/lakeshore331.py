@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-import csv
 import threading
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Callable
 
 import serial
@@ -128,45 +126,3 @@ class LakeShore331:
 
     def __exit__(self, *_: object) -> None:
         self.close()
-
-
-SNAPSHOT_FIELDS = [
-    "timestamp_utc",
-    "controller",
-    "serial_port",
-    "channel_a_kelvin",
-    "channel_b_kelvin",
-    "note",
-]
-
-
-def append_temperature_snapshot(
-    path: str | Path,
-    reading: TemperatureReading,
-    *,
-    controller: str,
-    serial_port: str,
-    note: str = "",
-) -> Path:
-    """Append one user-requested temperature snapshot to a CSV file."""
-
-    output = Path(path).expanduser()
-    output.parent.mkdir(parents=True, exist_ok=True)
-    write_header = not output.exists() or output.stat().st_size == 0
-    with output.open("a", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=SNAPSHOT_FIELDS)
-        if write_header:
-            writer.writeheader()
-        writer.writerow(
-            {
-                "timestamp_utc": reading.timestamp.astimezone(timezone.utc).isoformat(
-                    timespec="seconds"
-                ),
-                "controller": controller,
-                "serial_port": serial_port,
-                "channel_a_kelvin": reading.channel_a_kelvin,
-                "channel_b_kelvin": reading.channel_b_kelvin,
-                "note": note.strip(),
-            }
-        )
-    return output.resolve()
