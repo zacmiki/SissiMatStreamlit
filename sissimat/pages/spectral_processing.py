@@ -541,7 +541,10 @@ def render_spectral_processing_lab() -> None:
                 **_widget_default("lab_resample_spacing", median_spacing),
             )
 
-    with st.expander("2 · Background normalization (I / I₀)"):
+    with st.expander(
+        "2 · Background normalization (I / I₀)",
+        expanded=imported_steps is not None,
+    ):
         enable_background = st.checkbox(
             "Apply background normalization",
             key="lab_enable_background",
@@ -560,7 +563,10 @@ def render_spectral_processing_lab() -> None:
 
     max_window = source.x.size if source.x.size % 2 else source.x.size - 1
     default_window = min(11, max_window)
-    with st.expander("3 · Representation, smoothing and derivatives"):
+    with st.expander(
+        "3 · Representation, smoothing and derivatives",
+        expanded=imported_steps is not None,
+    ):
         representation = st.selectbox(
             "Convert current spectrum",
             [
@@ -599,7 +605,10 @@ def render_spectral_processing_lab() -> None:
             key="lab_derivative",
         )
 
-    with st.expander("4 · Baseline correction"):
+    with st.expander(
+        "4 · Baseline correction",
+        expanded=imported_steps is not None,
+    ):
         baseline_method = st.selectbox(
             "Baseline method",
             ["None", "arPLS", "Polynomial", "Rubber-band"],
@@ -647,7 +656,10 @@ def render_spectral_processing_lab() -> None:
                 **_widget_default("lab_polynomial_edges", 0.10),
             )
 
-    with st.expander("5 · Normalization"):
+    with st.expander(
+        "5 · Normalization",
+        expanded=imported_steps is not None,
+    ):
         normalization_method = st.selectbox(
             "Normalization method",
             ["None", "Min–max", "Vector", "Area"],

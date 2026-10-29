@@ -46,6 +46,13 @@ class EditableRecipeUITests(unittest.TestCase):
         self.assertTrue(app.get_by_key("lab_enable_smoothing").value)
         self.assertEqual(app.get_by_key("lab_smoothing_window").value, 9)
         self.assertEqual(app.get_by_key("lab_smoothing_order").value, 2)
+        processing_sections = [
+            section
+            for section in app.expander
+            if section.label.startswith(("1 ·", "2 ·", "3 ·", "4 ·", "5 ·"))
+        ]
+        self.assertEqual(len(processing_sections), 5)
+        self.assertTrue(all(section.proto.expanded for section in processing_sections))
 
         app.get_by_key("lab_crop_lower").set_value(1020.0).run()
 
